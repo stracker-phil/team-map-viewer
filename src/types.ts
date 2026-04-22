@@ -18,7 +18,15 @@ export interface Claim {
   verified: string;
 }
 
+export interface Link {
+  entity_id: string;
+  type: string;
+  url: string;
+  label: string;
+}
+
 export interface AppData {
   entities: Entity[];
   claims: Claim[];
+  links: Link[];
 }

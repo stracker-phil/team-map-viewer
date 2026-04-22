@@ -1,21 +1,24 @@
-import { staleDays, staleLevel, staleLabel } from '../utils/stale';
+import { staleDays, staleLevel } from '../utils/stale';
 
 interface Props {
   verified: string;
-  always?: boolean; // show even when fresh
 }
 
-export function StaleTag({ verified, always }: Props) {
+export function StaleTag({ verified }: Props) {
   const days = staleDays(verified);
   const level = staleLevel(days);
-  if (!always && level === 'fresh') return null;
+
+  let label: string;
+  if (days === null) {
+    label = 'No verification date';
+  } else {
+    label = `Last verified ${verified} (${days} day${days === 1 ? '' : 's'} ago)`;
+  }
 
   return (
     <span
-      className={`stale-tag stale-tag--${level}`}
-      title={verified ? `Last verified: ${verified}` : 'No verification date'}
-    >
-      {staleLabel(days)}
-    </span>
+      className={`stale-dot stale-dot--${level}`}
+      title={label}
+    />
   );
 }

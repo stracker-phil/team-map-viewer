@@ -1,119 +1,179 @@
-import { useParams } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FolderGit2, ArrowLeft, FileText } from 'lucide-react';
+import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { entityMap, filterClaims } from '../utils/derive';
 import { EntityLink } from '../components/EntityLink';
 import { StaleTag } from '../components/StaleTag';
-import { Entity, Claim } from '../types';
-import { Link } from 'react-router-dom';
+import { LinksSidebar } from '../components/LinksSidebar';
+import { OrgChart } from '../components/OrgChart';
+import { Claim } from '../types';
 
-const ROLE_ORDER = ['PM', 'PO', 'TL', 'dev', 'QA', ''];
+const ROLE_ORDER = ['TL', 'PM', 'PO', 'dev', 'QA', 'design', ''];
+
+const ROLE_LABELS: Record<string, string> = {
+  TL: 'Team Lead',
+  PM: 'Project Manager',
+  PO: 'Product Owner',
+  dev: 'Engineering',
+  QA: 'Quality Assurance',
+  design: 'Design',
+};
 
 export function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
-  const { entities, claims } = useData();
+  const { entities, claims, links } = useData();
+  const navigate = useNavigate();
   const map = entityMap(entities);
   const project = id ? map.get(id) : undefined;
 
   if (!project || project.type !== 'project') {
     return (
       <div className="empty-state">
-        <div className="empty-state__icon">❓</div>
+        <div className="empty-state__icon">Not found.</div>
         <h2 className="empty-state__title">Project not found</h2>
         <p>ID: {id}</p>
-        <Link to="/" className="btn btn--secondary">Back to overview</Link>
+        <button className="btn-outline" onClick={() => navigate('/')}>Back to overview</button>
       </div>
     );
   }
 
   const ownerClaim = filterClaims(claims, { subject: project.id, relation: 'owned-by' })[0];
   const owningTeam = ownerClaim ? map.get(ownerClaim.object) : undefined;
-
   const worksClaims = filterClaims(claims, { relation: 'works-on', object: project.id });
 
-  const grouped = groupByRole(worksClaims);
+  const grouped = useMemo(() => {
+    const result: Record<string, Claim[]> = {};
+    for (const c of worksClaims) {
+      const key = c.detail || '';
+      (result[key] ??= []).push(c);
+    }
+    return result;
+  }, [worksClaims]);
+
+  const sources = useMemo(() => {
+    const m = new Map<string, number>();
+    const all = ownerClaim ? [...worksClaims, ownerClaim] : worksClaims;
+    all.forEach(c => {
+      if (!c.source) return;
+      m.set(c.source, (m.get(c.source) ?? 0) + 1);
+    });
+    return [...m.entries()];
+  }, [worksClaims, ownerClaim]);
 
   return (
     <div>
-      <Link to="/" className="back-link">← Team Overview</Link>
+      <button className="back-link" onClick={() => navigate(-1)}>
+        <ArrowLeft size={13} />
+        BACK TO OVERVIEW
+      </button>
 
-      <div className="detail-header">
-        <div className="detail-header__tag">
-          <span className="entity-badge entity-badge--project">project</span>
-        </div>
-        <h1 className="detail-header__name">{project.name}</h1>
-        {project.meta && (
-          <div className="detail-header__meta">Client / context: {project.meta}</div>
-        )}
-      </div>
-
-      <div className="detail-layout">
-        <aside>
-          {owningTeam && (
-            <div className="detail-section">
-              <div className="detail-section__title">Owned by</div>
-              <EntityLink entity={owningTeam} />
-              {ownerClaim && <StaleTag verified={ownerClaim.verified} />}
-            </div>
-          )}
-
-          <div className="detail-section">
-            <div className="detail-section__title">Stats</div>
-            <p style={{ fontSize: 13, color: 'var(--muted)' }}>
-              {worksClaims.length} team member{worksClaims.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-        </aside>
-
-        <div>
-          <div className="card">
-            <div className="card__title">Team</div>
-            {worksClaims.length === 0 ? (
-              <p style={{ color: 'var(--muted)', fontSize: 13 }}>No members recorded.</p>
-            ) : (
-              ROLE_ORDER.filter(role => grouped[role]?.length).map(role => (
-                <RoleGroup key={role || '_other'} role={role} claimsWithEntity={grouped[role]} entityMap={map} />
-              ))
+      <div style={{ marginTop: '1.5rem' }}>
+        <div className="entity-header">
+          <span className="entity-header__icon"><FolderGit2 size={24} /></span>
+          <div style={{ flex: 1 }}>
+            <div className="entity-header__eyebrow">PROJECT</div>
+            <h2 className="entity-header__title">{project.name}</h2>
+            {project.meta && (
+              <div className="entity-header__meta">Client: {project.meta}</div>
             )}
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function groupByRole(claims: Claim[]): Record<string, Claim[]> {
-  const result: Record<string, Claim[]> = {};
-  for (const c of claims) {
-    const key = c.detail || '';
-    (result[key] ??= []).push(c);
-  }
-  return result;
-}
-
-function RoleGroup({
-  role,
-  claimsWithEntity,
-  entityMap: map,
-}: {
-  role: string;
-  claimsWithEntity: Claim[];
-  entityMap: Map<string, Entity>;
-}) {
-  return (
-    <div className="project-team-role-group">
-      {claimsWithEntity.map(c => {
-        const person = map.get(c.subject);
-        if (!person) return null;
-        return (
-          <div key={c.subject} className="claim-row">
-            <span className="detail-role">{role || '—'}</span>
-            <div className="claim-row__label">
-              <EntityLink entity={person} />
+        <div className="detail-layout">
+          <div className="detail-main">
+            {/* Meta section */}
+            <div className="dl-section">
+              <div className="dl-section__heading">META</div>
+              {owningTeam ? (
+                <dl className="dl-table">
+                  <dt className="dl-table__key">Owner</dt>
+                  <dd className="dl-table__value">
+                    <EntityLink entity={owningTeam} />
+                    {ownerClaim && <StaleTag verified={ownerClaim.verified} />}
+                  </dd>
+                </dl>
+              ) : (
+                <p className="dl-table__empty">No owner recorded yet.</p>
+              )}
             </div>
-            <StaleTag verified={c.verified} always />
+
+            {/* People section: org chart on desktop, grouped list on mobile */}
+            <div className="dl-section">
+              <div className="dl-section__heading">PEOPLE</div>
+
+              {/* Org chart — hidden on narrow screens */}
+              <div className="org-chart-wrap">
+                <OrgChart
+                  claims={worksClaims}
+                  entityMap={map}
+                  projectName={project.name}
+                />
+              </div>
+
+              {/* Fallback grouped list — shown on narrow screens */}
+              <div className="people-fallback">
+                {worksClaims.length === 0 ? (
+                  <p className="dl-table__empty">No team members recorded yet.</p>
+                ) : (
+                  <dl className="dl-table">
+                    {ROLE_ORDER
+                      .filter(r => grouped[r]?.length)
+                      .map(r => {
+                        const roleClaims = grouped[r];
+                        const people = roleClaims
+                          .map(c => ({ person: map.get(c.subject), claim: c }))
+                          .filter((x): x is { person: NonNullable<typeof x.person>; claim: Claim } => !!x.person)
+                          .sort((a, b) => a.person.name.localeCompare(b.person.name));
+                        if (!people.length) return null;
+                        return (
+                          <React.Fragment key={r || '_other'}>
+                            <dt className="dl-table__key">
+                              {ROLE_LABELS[r] || r || 'Other'}
+                            </dt>
+                            <dd className="dl-table__value">
+                              {people.map(({ person, claim }, i) => (
+                                <span key={person.id}>
+                                  {i > 0 && ', '}
+                                  <EntityLink entity={person} />
+                                  <StaleTag verified={claim.verified} />
+                                </span>
+                              ))}
+                            </dd>
+                          </React.Fragment>
+                        );
+                      })}
+                  </dl>
+                )}
+              </div>
+            </div>
+
+            {/* Sources block — de-emphasized */}
+            {sources.length > 0 && (
+              <div className="sources-block sources-block--quiet">
+                <div className="sources-block__label">
+                  <FileText size={11} />
+                  SOURCES
+                </div>
+                <ul className="sources-block__list">
+                  {sources.map(([src, count]) => (
+                    <li key={src} className="sources-block__item">
+                      <span style={{ color: 'var(--muted-light)' }}>→</span>
+                      <span>{src}</span>
+                      <span style={{ color: 'var(--muted-light)' }}>
+                        ({count} claim{count !== 1 ? 's' : ''})
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        );
-      })}
+
+          <LinksSidebar links={links} entityId={project.id} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -11,16 +11,12 @@ function routeFor(entity: Entity): string {
 
 interface Props {
   entity: Entity;
-  badge?: boolean;
+  className?: string;
 }
 
-export function EntityLink({ entity, badge }: Props) {
-  const cls = badge
-    ? `entity-badge entity-badge--${entity.type}`
-    : `entity-link entity-link--${entity.type}`;
-
+export function EntityLink({ entity, className }: Props) {
   return (
-    <Link to={routeFor(entity)} className={cls}>
+    <Link to={routeFor(entity)} className={`entity-link${className ? ` ${className}` : ''}`}>
       {entity.name}
     </Link>
   );

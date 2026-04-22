@@ -1,139 +1,166 @@
-import { useParams, Link } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { entityMap, filterClaims } from '../utils/derive';
 import { EntityLink } from '../components/EntityLink';
 import { StaleTag } from '../components/StaleTag';
-import { Entity } from '../types';
+import { Avatar } from '../components/Avatar';
+import { LinksSidebar } from '../components/LinksSidebar';
+import { Entity, Claim } from '../types';
+
+const REPORT_TYPE_LABELS: Record<string, string> = {
+  EM: 'Engineering Manager (EM)',
+  SL: 'Squad Lead (SL)',
+};
 
 export function PersonDetail() {
   const { id } = useParams<{ id: string }>();
-  const { entities, claims } = useData();
+  const { entities, claims, links } = useData();
+  const navigate = useNavigate();
   const map = entityMap(entities);
   const person = id ? map.get(id) : undefined;
 
   if (!person || person.type !== 'person') {
     return (
       <div className="empty-state">
-        <div className="empty-state__icon">❓</div>
+        <div className="empty-state__icon">Not found.</div>
         <h2 className="empty-state__title">Person not found</h2>
         <p>ID: {id}</p>
-        <Link to="/" className="btn btn--secondary">Back to overview</Link>
+        <button className="btn-outline" onClick={() => navigate('/')}>Back to overview</button>
       </div>
     );
   }
 
-  const teamClaims = filterClaims(claims, { subject: person.id, relation: 'member-of' });
   const reportsClaims = filterClaims(claims, { subject: person.id, relation: 'reports-to' });
+  const teamClaims = filterClaims(claims, { subject: person.id, relation: 'member-of' });
   const projectClaims = filterClaims(claims, { subject: person.id, relation: 'works-on' });
-  const reporteesClaims = filterClaims(claims, { object: person.id, relation: 'reports-to' });
 
-  const teams = resolve(teamClaims.map(c => c.object), map);
-  const managers = resolve(reportsClaims.map(c => c.object), map);
-  const projects = resolve(projectClaims.map(c => c.object), map);
-  const reportees = resolve(reporteesClaims.map(c => c.subject), map);
+  // Group reports-to by detail (EM, SL, etc.)
+  const reportsByType = new Map<string, { manager: Entity; claim: Claim }[]>();
+  for (const c of reportsClaims) {
+    const mgr = map.get(c.object);
+    if (!mgr) continue;
+    const type = c.detail || 'Reports to';
+    if (!reportsByType.has(type)) reportsByType.set(type, []);
+    reportsByType.get(type)!.push({ manager: mgr, claim: c });
+  }
+
+  // Known types first, then others
+  const knownTypes = ['EM', 'SL'];
+  const reportTypes = [
+    ...knownTypes.filter(t => reportsByType.has(t)),
+    ...[...reportsByType.keys()].filter(t => !knownTypes.includes(t)),
+  ];
+
+  const squads = teamClaims
+    .map(c => ({ squad: map.get(c.object), claim: c }))
+    .filter((x): x is { squad: Entity; claim: Claim } => !!x.squad)
+    .sort((a, b) => a.squad.name.localeCompare(b.squad.name));
+
+  const projects = projectClaims
+    .map(c => ({ project: map.get(c.object), claim: c }))
+    .filter((x): x is { project: Entity; claim: Claim } => !!x.project)
+    .sort((a, b) => a.project.name.localeCompare(b.project.name));
 
   return (
     <div>
-      <Link to="/" className="back-link">← Team Overview</Link>
+      <button className="back-link" onClick={() => navigate(-1)}>
+        <ArrowLeft size={13} />
+        BACK TO OVERVIEW
+      </button>
 
-      <div className="detail-header">
-        <div className="detail-header__tag">
-          <span className="entity-badge entity-badge--person">person</span>
-        </div>
-        <h1 className="detail-header__name">{person.name}</h1>
-        {person.meta && (
-          <div className="detail-header__meta">{person.meta}</div>
-        )}
-      </div>
-
-      <div className="detail-layout">
-        <aside>
-          {teams.length > 0 && (
-            <div className="detail-section">
-              <div className="detail-section__title">Team{teams.length > 1 ? 's' : ''}</div>
-              <ul className="detail-list">
-                {teamClaims.map(c => {
-                  const team = map.get(c.object);
-                  if (!team) return null;
-                  return (
-                    <li key={c.object}>
-                      <EntityLink entity={team} />
-                      <StaleTag verified={c.verified} />
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {managers.length > 0 && (
-            <div className="detail-section">
-              <div className="detail-section__title">Reports to</div>
-              <ul className="detail-list">
-                {reportsClaims.map(c => {
-                  const mgr = map.get(c.object);
-                  if (!mgr) return null;
-                  return (
-                    <li key={c.object}>
-                      <EntityLink entity={mgr} />
-                      {c.detail && <span style={{ fontSize: 11, color: 'var(--muted)' }}>{c.detail}</span>}
-                      <StaleTag verified={c.verified} />
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {reportees.length > 0 && (
-            <div className="detail-section">
-              <div className="detail-section__title">Direct reports</div>
-              <ul className="detail-list">
-                {reporteesClaims.map(c => {
-                  const rep = map.get(c.subject);
-                  if (!rep) return null;
-                  return (
-                    <li key={c.subject}>
-                      <EntityLink entity={rep} />
-                      {c.detail && <span style={{ fontSize: 11, color: 'var(--muted)' }}>{c.detail}</span>}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-        </aside>
-
-        <div>
-          <div className="card">
-            <div className="card__title">Projects</div>
-            {projectClaims.length === 0 ? (
-              <p style={{ color: 'var(--muted)', fontSize: 13 }}>No project assignments recorded.</p>
-            ) : (
-              projectClaims.map(c => {
-                const proj = map.get(c.object);
-                if (!proj) return null;
-                return (
-                  <div key={c.object} className="claim-row">
-                    <span className="detail-role">{c.detail || '—'}</span>
-                    <div className="claim-row__label">
-                      <EntityLink entity={proj} />
-                      {proj.meta && (
-                        <span style={{ fontSize: 12, color: 'var(--muted)' }}>{proj.meta}</span>
-                      )}
-                    </div>
-                    <StaleTag verified={c.verified} always />
-                  </div>
-                );
-              })
+      <div style={{ marginTop: '1.5rem' }}>
+        <div className="entity-header entity-header--person">
+          <Avatar name={person.name} id={person.id} size="lg" />
+          <div style={{ flex: 1 }}>
+            <div className="entity-header__eyebrow">PERSON</div>
+            <h2 className="entity-header__title">{person.name}</h2>
+            {person.meta && (
+              <div className="entity-header__meta">{person.meta}</div>
             )}
           </div>
+        </div>
+
+        <div className="detail-layout">
+          <div className="detail-main">
+            {/* Meta section */}
+            <div className="dl-section">
+              <div className="dl-section__heading">META</div>
+              {squads.length === 0 && projects.length === 0 ? (
+                <p className="dl-table__empty">No assignments recorded yet.</p>
+              ) : (
+                <dl className="dl-table">
+                  {squads.length > 0 && (
+                    <React.Fragment key="squads">
+                      <dt className="dl-table__key">Squads</dt>
+                      <dd className="dl-table__value">
+                        {squads.map(({ squad, claim }, i) => (
+                          <span key={squad.id}>
+                            {i > 0 && ', '}
+                            <EntityLink entity={squad} />
+                            <StaleTag verified={claim.verified} />
+                          </span>
+                        ))}
+                      </dd>
+                    </React.Fragment>
+                  )}
+                  {projects.length > 0 && (
+                    <React.Fragment key="projects">
+                      <dt className="dl-table__key">Contributes to</dt>
+                      <dd className="dl-table__value">
+                        {projects.map(({ project, claim }, i) => (
+                          <span key={project.id}>
+                            {i > 0 && ', '}
+                            <EntityLink entity={project} />
+                            {claim.detail && (
+                              <span className="dl-role-inline"> ({claim.detail})</span>
+                            )}
+                            <StaleTag verified={claim.verified} />
+                          </span>
+                        ))}
+                      </dd>
+                    </React.Fragment>
+                  )}
+                </dl>
+              )}
+            </div>
+
+            {/* People section — reports-to relationships */}
+            <div className="dl-section">
+              <div className="dl-section__heading">PEOPLE</div>
+              {reportTypes.length === 0 ? (
+                <p className="dl-table__empty">No reporting line recorded yet.</p>
+              ) : (
+                <dl className="dl-table">
+                  {reportTypes.map(type => {
+                    const entries = reportsByType.get(type)!;
+                    return (
+                      <React.Fragment key={type}>
+                        <dt className="dl-table__key">
+                          {REPORT_TYPE_LABELS[type] || type}
+                        </dt>
+                        <dd className="dl-table__value dl-table__value--avatars">
+                          {entries.map(({ manager, claim }, i) => (
+                            <span key={manager.id} className="dl-person">
+                              {i > 0 && <span className="dl-person__sep">, </span>}
+                              <Avatar name={manager.name} id={manager.id} size="sm" />
+                              <EntityLink entity={manager} />
+                              <StaleTag verified={claim.verified} />
+                            </span>
+                          ))}
+                        </dd>
+                      </React.Fragment>
+                    );
+                  })}
+                </dl>
+              )}
+            </div>
+          </div>
+
+          <LinksSidebar links={links} entityId={person.id} />
         </div>
       </div>
     </div>
   );
-}
-
-function resolve(ids: string[], map: Map<string, Entity>): Entity[] {
-  return ids.map(id => map.get(id)).filter((e): e is Entity => !!e);
 }

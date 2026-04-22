@@ -65,3 +65,22 @@ henry,works-on,project-delta,dev,Issue tracker,2026-02-01
 ivan,works-on,project-epsilon,TL,Wiki: /team/epsilon,2026-01-15
 julia,works-on,project-epsilon,dev,Issue tracker,2026-01-15
 kate,works-on,project-epsilon,PM,Wiki: /team/epsilon,2026-01-15`;
+
+export const SAMPLE_LINKS_CSV = `entity_id,type,url,label
+project-alpha,jira,https://example.atlassian.net/browse/ALPHA,Jira: ALPHA
+project-alpha,slack,https://app.slack.com/client/T/C001,#project-alpha
+project-alpha,github,https://github.com/example/project-alpha,example/project-alpha
+project-beta,jira,https://example.atlassian.net/browse/BETA,Jira: BETA
+project-beta,slack,https://app.slack.com/client/T/C002,#project-beta
+project-gamma,jira,https://example.atlassian.net/browse/GAMMA,Jira: GAMMA
+project-gamma,slack,https://app.slack.com/client/T/C003,#project-gamma
+project-gamma,website,https://example.com/gamma,Product page
+project-delta,jira,https://example.atlassian.net/browse/DELTA,Jira: DELTA
+project-epsilon,jira,https://example.atlassian.net/browse/EPS,Jira: EPS
+project-epsilon,slack,https://app.slack.com/client/T/C004,#project-epsilon
+team-backend,confluence,https://example.atlassian.net/wiki/backend,Backend Team Confluence
+team-backend,slack,https://app.slack.com/client/T/C005,#team-backend
+team-backend,slack,https://app.slack.com/client/T/C006,#team-backend-dev
+team-frontend,confluence,https://example.atlassian.net/wiki/frontend,Frontend Team Confluence
+team-frontend,slack,https://app.slack.com/client/T/C007,#team-frontend
+team-support,slack,https://app.slack.com/client/T/C008,#team-support`;

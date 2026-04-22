@@ -3,6 +3,7 @@ import { DataProvider } from './context/DataContext';
 import { Layout } from './components/Layout';
 import { TeamOverview } from './views/TeamOverview';
 import { RoleList } from './views/RoleList';
+import { ProjectsList } from './views/ProjectsList';
 import { ProjectDetail } from './views/ProjectDetail';
 import { PersonDetail } from './views/PersonDetail';
 import { SquadDetail } from './views/SquadDetail';
@@ -18,6 +19,7 @@ export function App() {
           <Routes>
             <Route path="/" element={<TeamOverview />} />
             <Route path="/roles" element={<RoleList />} />
+            <Route path="/projects" element={<ProjectsList />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/person/:id" element={<PersonDetail />} />
             <Route path="/squad/:id" element={<SquadDetail />} />

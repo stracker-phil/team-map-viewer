@@ -1,105 +1,94 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { entityMap, byType, filterClaims } from '../utils/derive';
+import { byType } from '../utils/derive';
 import { EntityLink } from '../components/EntityLink';
+import { Avatar } from '../components/Avatar';
 import { Entity } from '../types';
-import { Link } from 'react-router-dom';
 
 export function RoleList() {
-  const { entities, claims } = useData();
-  const persons = byType(entities, 'person');
-  const map = entityMap(entities);
+  const { entities } = useData();
+  const navigate = useNavigate();
+  const people = byType(entities, 'person');
 
-  const roles = [...new Set(persons.map(p => p.meta).filter(Boolean))].sort();
-  const [selected, setSelected] = useState<string>(roles[0] ?? '');
+  const allRoles = useMemo(() => {
+    const counts = new Map<string, number>();
+    people.forEach(p => {
+      if (!p.meta) return;
+      counts.set(p.meta, (counts.get(p.meta) ?? 0) + 1);
+    });
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  }, [people]);
 
-  if (persons.length === 0) {
+  const [roleFilter, setRoleFilter] = useState<string | null>(null);
+
+  const grouped = useMemo(() => {
+    const shown = roleFilter ? people.filter(p => p.meta === roleFilter) : people;
+    const m = new Map<string, Entity[]>();
+    shown.forEach(p => {
+      const r = p.meta || 'Other';
+      if (!m.has(r)) m.set(r, []);
+      m.get(r)!.push(p);
+    });
+    return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [people, roleFilter]);
+
+  if (people.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-state__icon">👥</div>
+        <div className="empty-state__icon">No people yet.</div>
         <h2 className="empty-state__title">No people yet</h2>
-        <p>Import your CSV files to see roles.</p>
-        <Link to="/import" className="btn btn--primary">Import data</Link>
+        <p>Import your CSV files to see the roster.</p>
+        <button className="btn-primary" onClick={() => navigate('/import')}>Import data</button>
       </div>
     );
   }
 
-  const filtered = persons.filter(p => p.meta === selected);
-
   return (
     <div>
-      <div className="page-header">
-        <h1>Roles</h1>
-        <p>Filter by role to see who does what</p>
+      <div className="section-intro">
+        <div className="section-intro__eyebrow">ROSTER</div>
+        <h2 className="section-intro__title">People</h2>
       </div>
 
-      <div className="role-filter">
-        {roles.map(role => (
+      <div className="role-filters">
+        <button
+          className={`role-filter-btn${roleFilter === null ? ' active' : ''}`}
+          onClick={() => setRoleFilter(null)}
+        >
+          ALL · {String(people.length).padStart(2, '0')}
+        </button>
+        {allRoles.map(([role, count]) => (
           <button
             key={role}
-            className={`role-pill${selected === role ? ' active' : ''}`}
-            onClick={() => setSelected(role)}
+            className={`role-filter-btn${roleFilter === role ? ' active' : ''}`}
+            onClick={() => setRoleFilter(roleFilter === role ? null : role)}
           >
-            {role}
+            {role.toUpperCase()} · {String(count).padStart(2, '0')}
           </button>
         ))}
-        <button
-          className={`role-pill${selected === '' ? ' active' : ''}`}
-          onClick={() => setSelected('')}
-        >
-          All
-        </button>
       </div>
 
-      <div className="person-grid">
-        {(selected === '' ? persons : filtered).map(person => (
-          <PersonCard key={person.id} person={person} entities={entities} claims={claims.filter(c => c.subject === person.id && c.relation === 'works-on')} entityMap={map} />
+      <div>
+        {grouped.map(([role, list]) => (
+          <div key={role} className="role-group">
+            <div className="role-group__header">
+              <h3 className="role-group__title">{role}</h3>
+              <span className="role-group__meta">
+                {role.toUpperCase()} · {String(list.length).padStart(2, '0')}
+              </span>
+            </div>
+            <ul className="role-group__list">
+              {list.map(p => (
+                <li key={p.id} className="role-group__list-item">
+                  <Avatar name={p.name} id={p.id} size="sm" />
+                  <EntityLink entity={p} />
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function PersonCard({
-  person,
-  entityMap: map,
-  claims: worksOnClaims,
-}: {
-  person: Entity;
-  entities: Entity[];
-  claims: ReturnType<typeof filterClaims>;
-  entityMap: Map<string, Entity>;
-}) {
-  const teamClaims = worksOnClaims;
-
-  return (
-    <div className="person-card">
-      <div className="person-card__name">
-        <EntityLink entity={person} />
-      </div>
-      {person.meta && (
-        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: '0.6rem' }}>
-          {person.meta}
-        </div>
-      )}
-      {teamClaims.length > 0 && (
-        <div className="person-projects">
-          {teamClaims.map(c => {
-            const proj = map.get(c.object);
-            if (!proj) return null;
-            return (
-              <span key={c.object}>
-                <EntityLink entity={proj} badge />
-                {c.detail && (
-                  <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 2 }}>
-                    {c.detail}
-                  </span>
-                )}
-              </span>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

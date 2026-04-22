@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { Entity, Claim, EntityType, RelationType } from '../types';
+import { Entity, Claim, Link, EntityType, RelationType } from '../types';
 
 const VALID_ENTITY_TYPES = new Set<string>(['person', 'project', 'squad']);
 const VALID_RELATIONS = new Set<string>(['works-on', 'owned-by', 'member-of', 'reports-to']);
@@ -64,12 +64,41 @@ export function parseClaims(csv: string): { data: Claim[]; errors: string[] } {
   return { data, errors };
 }
 
+export function parseLinks(csv: string): { data: Link[]; errors: string[] } {
+  const result = Papa.parse<Record<string, string>>(csv.trim(), {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  const errors: string[] = [];
+  const data: Link[] = [];
+
+  for (const row of result.data) {
+    if (!row.entity_id || !row.type || !row.url || !row.label) {
+      errors.push(`Row missing required field (entity_id/type/url/label): ${JSON.stringify(row)}`);
+      continue;
+    }
+    data.push({
+      entity_id: row.entity_id.trim(),
+      type: row.type.trim(),
+      url: row.url.trim(),
+      label: row.label.trim(),
+    });
+  }
+
+  return { data, errors };
+}
+
 export function exportEntities(entities: Entity[]): string {
   return Papa.unparse(entities);
 }
 
 export function exportClaims(claims: Claim[]): string {
   return Papa.unparse(claims);
+}
+
+export function exportLinks(links: Link[]): string {
+  return Papa.unparse(links);
 }
 
 export function downloadCsv(content: string, filename: string): void {
