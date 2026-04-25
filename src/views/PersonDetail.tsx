@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { entityMap, filterClaims } from '../utils/derive';
+import { entityMap, filterClaims, personRoleMap } from '../utils/derive';
 import { EntityLink } from '../components/EntityLink';
 import { StaleTag } from '../components/StaleTag';
 import { Avatar } from '../components/Avatar';
@@ -14,11 +14,17 @@ const REPORT_TYPE_LABELS: Record<string, string> = {
   SL: 'Squad Lead (SL)',
 };
 
+const MANAGES_TYPE_LABELS: Record<string, string> = {
+  EM: 'Manages (EM)',
+  SL: 'Manages (SL)',
+};
+
 export function PersonDetail() {
   const { id } = useParams<{ id: string }>();
   const { entities, claims, links } = useData();
   const navigate = useNavigate();
   const map = entityMap(entities);
+  const roleMap = useMemo(() => personRoleMap(claims), [claims]);
   const person = id ? map.get(id) : undefined;
 
   if (!person || person.type !== 'person') {
@@ -33,6 +39,7 @@ export function PersonDetail() {
   }
 
   const reportsClaims = filterClaims(claims, { subject: person.id, relation: 'reports-to' });
+  const managesClaims = filterClaims(claims, { relation: 'reports-to', object: person.id });
   const teamClaims = filterClaims(claims, { subject: person.id, relation: 'member-of' });
   const projectClaims = filterClaims(claims, { subject: person.id, relation: 'works-on' });
 
@@ -51,6 +58,20 @@ export function PersonDetail() {
   const reportTypes = [
     ...knownTypes.filter(t => reportsByType.has(t)),
     ...[...reportsByType.keys()].filter(t => !knownTypes.includes(t)),
+  ];
+
+  // People who report to this person (reverse of reports-to)
+  const managesByType = new Map<string, { report: Entity; claim: Claim }[]>();
+  for (const c of managesClaims) {
+    const report = map.get(c.subject);
+    if (!report) continue;
+    const type = c.detail || 'Direct Reports';
+    if (!managesByType.has(type)) managesByType.set(type, []);
+    managesByType.get(type)!.push({ report, claim: c });
+  }
+  const managesTypes = [
+    ...knownTypes.filter(t => managesByType.has(t)),
+    ...[...managesByType.keys()].filter(t => !knownTypes.includes(t)),
   ];
 
   const squads = teamClaims
@@ -76,8 +97,8 @@ export function PersonDetail() {
           <div style={{ flex: 1 }}>
             <div className="entity-header__eyebrow">PERSON</div>
             <h2 className="entity-header__title">{person.name}</h2>
-            {person.meta && (
-              <div className="entity-header__meta">{person.meta}</div>
+            {(roleMap.get(person.id) || person.meta) && (
+              <div className="entity-header__meta">{roleMap.get(person.id) || person.meta}</div>
             )}
           </div>
         </div>
@@ -108,10 +129,9 @@ export function PersonDetail() {
                   {projects.length > 0 && (
                     <React.Fragment key="projects">
                       <dt className="dl-table__key">Contributes to</dt>
-                      <dd className="dl-table__value">
-                        {projects.map(({ project, claim }, i) => (
+                      <dd className="dl-table__value dl-table__value--avatars">
+                        {projects.map(({ project, claim }) => (
                           <span key={project.id}>
-                            {i > 0 && ', '}
                             <EntityLink entity={project} />
                             {claim.detail && (
                               <span className="dl-role-inline"> ({claim.detail})</span>
@@ -126,26 +146,45 @@ export function PersonDetail() {
               )}
             </div>
 
-            {/* People section — reports-to relationships */}
+            {/* People section — reports-to relationships + manages */}
             <div className="dl-section">
               <div className="dl-section__heading">PEOPLE</div>
-              {reportTypes.length === 0 ? (
+              {reportTypes.length === 0 && managesTypes.length === 0 ? (
                 <p className="dl-table__empty">No reporting line recorded yet.</p>
               ) : (
                 <dl className="dl-table">
                   {reportTypes.map(type => {
                     const entries = reportsByType.get(type)!;
                     return (
-                      <React.Fragment key={type}>
+                      <React.Fragment key={`reports-${type}`}>
                         <dt className="dl-table__key">
                           {REPORT_TYPE_LABELS[type] || type}
                         </dt>
                         <dd className="dl-table__value dl-table__value--avatars">
-                          {entries.map(({ manager, claim }, i) => (
+                          {entries.map(({ manager, claim }) => (
                             <span key={manager.id} className="dl-person">
-                              {i > 0 && <span className="dl-person__sep">, </span>}
                               <Avatar name={manager.name} id={manager.id} size="sm" />
                               <EntityLink entity={manager} />
+                              <StaleTag verified={claim.verified} />
+                            </span>
+                          ))}
+                        </dd>
+                      </React.Fragment>
+                    );
+                  })}
+                  {managesTypes.map(type => {
+                    const entries = managesByType.get(type)!
+                      .sort((a, b) => a.report.name.localeCompare(b.report.name));
+                    return (
+                      <React.Fragment key={`manages-${type}`}>
+                        <dt className="dl-table__key">
+                          {MANAGES_TYPE_LABELS[type] || type}
+                        </dt>
+                        <dd className="dl-table__value dl-table__value--avatars">
+                          {entries.map(({ report, claim }) => (
+                            <span key={report.id} className="dl-person">
+                              <Avatar name={report.name} id={report.id} size="sm" />
+                              <EntityLink entity={report} />
                               <StaleTag verified={claim.verified} />
                             </span>
                           ))}

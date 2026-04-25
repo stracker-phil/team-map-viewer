@@ -23,10 +23,20 @@ export function filterClaims(
 export function searchEntities(entities: Entity[], query: string): Entity[] {
   const q = query.toLowerCase().trim();
   if (!q) return [];
-  return entities.filter(
-    e =>
+  const seen = new Set<string>();
+  return entities.filter(e => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return (
       e.name.toLowerCase().includes(q) ||
       e.id.toLowerCase().includes(q) ||
-      e.meta.toLowerCase().includes(q),
-  );
+      e.meta.toLowerCase().includes(q)
+    );
+  });
+}
+
+export function personRoleMap(claims: Claim[]): Map<string, string> {
+  const m = new Map<string, string>();
+  filterClaims(claims, { relation: 'role' }).forEach(c => m.set(c.subject, c.object));
+  return m;
 }

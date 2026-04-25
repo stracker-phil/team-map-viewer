@@ -28,20 +28,12 @@ export function ProjectDetail() {
   const map = entityMap(entities);
   const project = id ? map.get(id) : undefined;
 
-  if (!project || project.type !== 'project') {
-    return (
-      <div className="empty-state">
-        <div className="empty-state__icon">Not found.</div>
-        <h2 className="empty-state__title">Project not found</h2>
-        <p>ID: {id}</p>
-        <button className="btn-outline" onClick={() => navigate('/')}>Back to overview</button>
-      </div>
-    );
-  }
-
-  const ownerClaim = filterClaims(claims, { subject: project.id, relation: 'owned-by' })[0];
+  const ownerClaim = project ? filterClaims(claims, { subject: project.id, relation: 'owned-by' })[0] : undefined;
   const owningTeam = ownerClaim ? map.get(ownerClaim.object) : undefined;
-  const worksClaims = filterClaims(claims, { relation: 'works-on', object: project.id });
+  const worksClaims = useMemo(
+    () => project ? filterClaims(claims, { relation: 'works-on', object: project.id }) : [],
+    [claims, project],
+  );
 
   const grouped = useMemo(() => {
     const result: Record<string, Claim[]> = {};
@@ -61,6 +53,17 @@ export function ProjectDetail() {
     });
     return [...m.entries()];
   }, [worksClaims, ownerClaim]);
+
+  if (!project || project.type !== 'project') {
+    return (
+      <div className="empty-state">
+        <div className="empty-state__icon">Not found.</div>
+        <h2 className="empty-state__title">Project not found</h2>
+        <p>ID: {id}</p>
+        <button className="btn-outline" onClick={() => navigate('/')}>Back to overview</button>
+      </div>
+    );
+  }
 
   return (
     <div>

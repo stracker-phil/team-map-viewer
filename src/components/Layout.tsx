@@ -1,9 +1,8 @@
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Boxes, Users, FolderGit2, Search, X, Upload, Download, UserCircle2 } from 'lucide-react';
+import { Boxes, Users, FolderGit2, Search, X, Upload, UserCircle2 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { byType, searchEntities } from '../utils/derive';
-import { exportEntities, exportClaims, downloadCsv } from '../utils/csv';
 import { ImportData } from '../views/ImportData';
 import { Entity } from '../types';
 
@@ -17,9 +16,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { entities, claims, isDemo } = useData();
   const [search, setSearch] = useState('');
   const [focused, setFocused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [showImport, setShowImport] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    function onGlobalKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'l') {
+        e.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+      }
+    }
+    window.addEventListener('keydown', onGlobalKeyDown);
+    return () => window.removeEventListener('keydown', onGlobalKeyDown);
+  }, []);
 
   const people = useMemo(() => byType(entities, 'person'), [entities]);
   const projects = useMemo(() => byType(entities, 'project'), [entities]);
@@ -34,17 +46,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return String(n).padStart(2, '0');
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter' && search.trim()) {
-      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(prev => Math.min(prev + 1, searchResults.length - 1));
+      setFocused(true);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(prev => Math.max(prev - 1, -1));
+    } else if (e.key === 'Escape') {
       setSearch('');
       setFocused(false);
+      setActiveIndex(-1);
+    } else if (e.key === 'Enter') {
+      const hit = activeIndex >= 0 ? searchResults[activeIndex] : null;
+      if (hit) {
+        navigate(`/${hit.type === 'person' ? 'person' : hit.type === 'project' ? 'project' : 'squad'}/${hit.id}`);
+      } else if (search.trim()) {
+        navigate(`/search?q=${encodeURIComponent(search.trim())}`);
+      }
+      setSearch('');
+      setFocused(false);
+      setActiveIndex(-1);
     }
-  }
-
-  function handleExport() {
-    downloadCsv(exportEntities(entities), 'entities.csv');
-    setTimeout(() => downloadCsv(exportClaims(claims), 'claims.csv'), 100);
   }
 
   return (
@@ -73,10 +97,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <button className="btn-outline" onClick={() => setShowImport(true)}>
                 <Upload size={13} />
                 IMPORT
-              </button>
-              <button className="btn-outline" onClick={handleExport}>
-                <Download size={13} />
-                EXPORT
               </button>
             </div>
           </div>
@@ -117,9 +137,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   ref={searchRef}
                   className="search-bar__input"
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  onChange={e => { setSearch(e.target.value); setActiveIndex(-1); setFocused(true); }}
                   onFocus={() => setFocused(true)}
-                  onBlur={() => setTimeout(() => setFocused(false), 150)}
+                  onBlur={() => setTimeout(() => { setFocused(false); setActiveIndex(-1); }, 150)}
                   onKeyDown={handleKeyDown}
                   placeholder="Search people, projects, squads…"
                   aria-label="Search"
@@ -133,22 +153,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
               {focused && searchResults.length > 0 && (
                 <div className="search-dropdown">
-                  {searchResults.map(e => (
+                  {searchResults.map((entity, idx) => (
                     <button
-                      key={e.id}
-                      className="search-dropdown__item"
+                      key={entity.id}
+                      className={`search-dropdown__item${idx === activeIndex ? ' is-active' : ''}`}
                       onMouseDown={() => {
-                        navigate(`/${e.type === 'person' ? 'person' : e.type === 'project' ? 'project' : 'squad'}/${e.id}`);
+                        navigate(`/${entity.type === 'person' ? 'person' : entity.type === 'project' ? 'project' : 'squad'}/${entity.id}`);
                         setSearch('');
+                        setActiveIndex(-1);
                       }}
+                      onMouseEnter={() => setActiveIndex(idx)}
                     >
                       <span style={{ color: 'var(--muted)', display: 'flex' }}>
-                        <TypeIcon type={e.type} />
+                        <TypeIcon type={entity.type} />
                       </span>
                       <div>
-                        <div className="search-dropdown__name">{e.name}</div>
+                        <div className="search-dropdown__name">{entity.name}</div>
                         <div className="search-dropdown__meta">
-                          {e.type}{e.meta ? ` · ${e.meta}` : ''}
+                          {entity.type}{entity.meta ? ` · ${entity.meta}` : ''}
                         </div>
                       </div>
                     </button>

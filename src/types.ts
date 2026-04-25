@@ -1,5 +1,5 @@
 export type EntityType = 'person' | 'project' | 'squad';
-export type RelationType = 'works-on' | 'owned-by' | 'member-of' | 'reports-to';
+export type RelationType = 'works-on' | 'owned-by' | 'member-of' | 'reports-to' | 'role';
 export type StaleLevel = 'fresh' | 'warn' | 'old' | 'stale';
 
 export interface Entity {

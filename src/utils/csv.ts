@@ -2,7 +2,7 @@ import Papa from 'papaparse';
 import { Entity, Claim, Link, EntityType, RelationType } from '../types';
 
 const VALID_ENTITY_TYPES = new Set<string>(['person', 'project', 'squad']);
-const VALID_RELATIONS = new Set<string>(['works-on', 'owned-by', 'member-of', 'reports-to']);
+const VALID_RELATIONS = new Set<string>(['works-on', 'owned-by', 'member-of', 'reports-to', 'role']);
 
 export function parseEntities(csv: string): { data: Entity[]; errors: string[] } {
   const result = Papa.parse<Record<string, string>>(csv.trim(), {
@@ -99,14 +99,4 @@ export function exportClaims(claims: Claim[]): string {
 
 export function exportLinks(links: Link[]): string {
   return Papa.unparse(links);
-}
-
-export function downloadCsv(content: string, filename: string): void {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 }

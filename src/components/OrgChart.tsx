@@ -13,7 +13,8 @@ const ROLE_LABELS: Record<string, string> = {
   design: 'Design',
 };
 
-const BRANCH_ROLE_ORDER = ['PM', 'PO', 'dev', 'QA', 'design'];
+const PM_ROLES = ['PM', 'PO'];
+const BRANCH_ROLE_ORDER = ['dev', 'QA', 'design'];
 
 interface OrgChartProps {
   claims: Claim[];
@@ -59,6 +60,16 @@ export function OrgChart({ claims, entityMap: map, projectName }: OrgChartProps)
     [grouped, map],
   );
 
+  const pmPeople = useMemo(
+    () =>
+      PM_ROLES.flatMap(r =>
+        (grouped[r] ?? [])
+          .map(c => ({ person: map.get(c.subject), claim: c }))
+          .filter((x): x is { person: Entity; claim: Claim } => !!x.person),
+      ).sort((a, b) => a.person.name.localeCompare(b.person.name)),
+    [grouped, map],
+  );
+
   const branches = useMemo(
     () =>
       BRANCH_ROLE_ORDER
@@ -75,9 +86,10 @@ export function OrgChart({ claims, entityMap: map, projectName }: OrgChartProps)
   );
 
   const hasRoot = tlPeople.length > 0;
+  const hasPM = pmPeople.length > 0;
   const hasBranches = branches.length > 0;
 
-  if (!hasRoot && !hasBranches) {
+  if (!hasRoot && !hasPM && !hasBranches) {
     return (
       <div className="org-chart__empty">No team members recorded yet.</div>
     );
@@ -93,29 +105,34 @@ export function OrgChart({ claims, entityMap: map, projectName }: OrgChartProps)
         </div>
       )}
 
-      {hasBranches && (
-        <>
-          {hasRoot && <div className="org-chart__stem" />}
-          <div className="org-chart__branches-wrap">
-            <div className="org-chart__branches">
-              {branches.map(branch => (
-                <div key={branch.role} className="org-branch">
-                  <div className="org-branch__stem" />
-                  <div className="org-branch__label">{branch.label}</div>
-                  <div className="org-branch__nodes">
-                    {branch.people.map(({ person, claim }) => (
-                      <OrgNode key={person.id} person={person} claim={claim} size="sm" />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
+      {hasRoot && hasPM && <div className="org-chart__stem" />}
+
+      {hasPM && (
+        <div className="org-chart__pm-level">
+          {pmPeople.map(({ person, claim }) => (
+            <OrgNode key={person.id} person={person} claim={claim} size="md" />
+          ))}
+        </div>
       )}
 
-      {!hasRoot && !hasBranches && (
-        <p className="org-chart__empty">{projectName} — no team recorded yet.</p>
+      {hasBranches && (hasRoot || hasPM) && <div className="org-chart__stem" />}
+
+      {hasBranches && (
+        <div className="org-chart__branches-wrap">
+          <div className="org-chart__branches">
+            {branches.map(branch => (
+              <div key={branch.role} className="org-branch">
+                <div className="org-branch__stem" />
+                <div className="org-branch__label">{branch.label}</div>
+                <div className="org-branch__nodes">
+                  {branch.people.map(({ person, claim }) => (
+                    <OrgNode key={person.id} person={person} claim={claim} size="sm" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

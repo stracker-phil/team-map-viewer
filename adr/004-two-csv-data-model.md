@@ -8,7 +8,9 @@ Org data goes stale unevenly — a person's team membership may hold while their
 
 ## Decision
 
-Split data into `entities.csv` (id, name, type, meta) and `claims.csv` (subject, relation, object, detail, source, verified). Entities carry zero structural information; every relationship is a standalone row in claims with its own `source` and `verified` date. Relation types: `works-on`, `owned-by`, `member-of`, `reports-to`.
+Split data into `entities.csv` (id, name, type, meta) and `claims.csv` (subject, relation, object, detail, source, verified). Entities carry zero structural information; every relationship is a standalone row in claims with its own `source` and `verified` date. Relation types: `works-on`, `owned-by`, `member-of`, `reports-to`, `role`.
+
+**Amendment (2026-04-25):** Added `role` relation type. For a `role` claim, `subject` is a person entity ID and `object` is a free-text specific job title (e.g. "Senior Frontend Developer"). This separates the *general category* stored in `person.meta` (used for grouping and org chart) from the *specific display title* used in person headers and list items.
 
 ## Consequences
 

@@ -7,7 +7,7 @@ import { byType, filterClaims, entityMap } from '../utils/derive';
 export function ProjectsList() {
   const { entities, claims } = useData();
   const navigate = useNavigate();
-  const projects = byType(entities, 'project');
+  const allProjects = byType(entities, 'project');
   const map = entityMap(entities);
 
   const teamSize = useMemo(() => {
@@ -17,6 +17,11 @@ export function ProjectsList() {
     });
     return m;
   }, [claims]);
+
+  const projects = useMemo(
+    () => allProjects.filter(p => (teamSize[p.id] ?? 0) > 0),
+    [allProjects, teamSize],
+  );
 
   const squadOf = useMemo(() => {
     const m: Record<string, string> = {};
@@ -55,9 +60,9 @@ export function ProjectsList() {
             >
               <div className="project-card__top">
                 <div style={{ flex: 1 }}>
-                  <div className="project-card__eyebrow">
-                    {p.meta || 'CLIENT UNKNOWN'}
-                  </div>
+                  {p.meta && (
+                    <div className="project-card__eyebrow">{p.meta}</div>
+                  )}
                   <h3 className="project-card__name">{p.name}</h3>
                 </div>
                 <span className="project-card__icon"><FolderGit2 size={18} /></span>

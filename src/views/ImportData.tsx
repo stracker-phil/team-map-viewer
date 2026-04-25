@@ -8,7 +8,6 @@ import {
   exportEntities,
   exportClaims,
   exportLinks,
-  downloadCsv,
 } from '../utils/csv';
 import { SAMPLE_ENTITIES_CSV, SAMPLE_CLAIMS_CSV, SAMPLE_LINKS_CSV } from '../sampleData';
 
@@ -17,10 +16,10 @@ interface Props {
 }
 
 export function ImportData({ onClose }: Props = {}) {
-  const { entities, claims, links, setData, clearData } = useData();
-  const [entitiesCsv, setEntitiesCsv] = useState('');
-  const [claimsCsv, setClaimsCsv] = useState('');
-  const [linksCsv, setLinksCsv] = useState('');
+  const { entities, claims, links, setData, clearData, isDemo } = useData();
+  const [entitiesCsv, setEntitiesCsv] = useState(() => isDemo ? '' : exportEntities(entities));
+  const [claimsCsv, setClaimsCsv] = useState(() => isDemo ? '' : exportClaims(claims));
+  const [linksCsv, setLinksCsv] = useState(() => isDemo ? '' : exportLinks(links));
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState('');
   const entitiesFileRef = useRef<HTMLInputElement>(null);
@@ -162,7 +161,7 @@ export function ImportData({ onClose }: Props = {}) {
 
   return (
     <div>
-      <h1 className="import-page__title">Import / Export</h1>
+      <h1 className="import-page__title">Import</h1>
       <p className="import-page__subtitle">
         Paste CSV content or load files. Data is saved to your browser's local storage.
       </p>
@@ -176,32 +175,9 @@ export function ImportData({ onClose }: Props = {}) {
             Load sample data
           </button>
           {entities.length > 0 && (
-            <>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={() => downloadCsv(exportEntities(entities), 'entities.csv')}
-              >
-                Export entities.csv
-              </button>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={() => downloadCsv(exportClaims(claims), 'claims.csv')}
-              >
-                Export claims.csv
-              </button>
-              <button
-                type="button"
-                className="btn-outline"
-                onClick={() => downloadCsv(exportLinks(links), 'links.csv')}
-              >
-                Export links.csv
-              </button>
-              <button type="button" className="btn-danger" onClick={handleClear}>
-                Clear all data
-              </button>
-            </>
+            <button type="button" className="btn-danger" onClick={handleClear}>
+              Clear all data
+            </button>
           )}
         </div>
       </form>
