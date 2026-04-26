@@ -1,25 +1,29 @@
 # SPEC-011: Projects view
 
-**Status:** Established
+**Status:** Established (updated 2026-04-26 — table layout replaces card grid)
 
 ## Overview
 
-The Projects view (`#/projects`) shows all projects as a 2-column card grid.
+The projects view (`#/projects`) shows all active projects as a sortable table with optional owner filtering.
 
-## Grid
+## Owner filter chips
 
-- Only projects with ≥1 `works-on` member are shown. Projects with 0 members are hidden (treated as stale/inactive).
-- Remaining projects rendered as cards, in the order they appear in `entities`.
-- 2 columns on desktop, 1 column below 768 px.
+A row of filter chips appears above the table whenever any project has an `owned-by` claim.
 
-## Project card
+- **ALL · {N}** — always first; resets the filter; shows total active project count.
+- **{Squad name} · {N}** — one chip per squad that owns ≥1 project; sorted by project count descending.
+- **OTHER · {N}** — shown only when ≥1 project has no `owned-by` claim; filters to unowned projects.
 
-Each card is a clickable button that navigates to `#/project/:id`. It shows:
+Clicking an active chip deselects it (returns to ALL). Clicking a different chip switches the filter directly.
 
-- **Eyebrow**: `meta` (client name), only rendered if `meta` is non-empty. No fallback label.
-- **Name**: project name in Fraunces serif.
-- **Footer bar**: "TEAM · {count}" showing the number of `works-on` claims for the project, plus "OWNER · {squad name}" if an `owned-by` claim exists. Both values are uppercase monospace.
+## Table
+
+- Only projects with ≥1 `works-on` member are shown. Zero-member projects are hidden everywhere.
+- Project entities are deduplicated by id before display to guard against duplicate rows in source CSV.
+- Columns: **Name** (dynamic width) · **Team size** (100 px, fixed) · **Owner** (100 px, fixed).
+- `table-layout: fixed` — name column takes all remaining width.
+- Each row is clickable and navigates to `#/project/:id`.
 
 ## Empty state
 
-If no project entities exist, shows "No projects yet" with an "Import data" button.
+If no active project entities exist, shows "No projects yet" with an "Import data" button.

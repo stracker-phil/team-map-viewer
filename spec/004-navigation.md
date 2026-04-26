@@ -1,6 +1,6 @@
 # SPEC-004: Navigation and routing
 
-**Status:** Established
+**Status:** Established (updated April 2026 — fixed topbar, CMD+K search)
 
 ## Overview
 
@@ -13,15 +13,38 @@ The app is a hash-routed SPA. All URLs are `#/…` paths so the app can be serve
 | `#/`                | Squad overview  |
 | `#/roles`           | People (roster) |
 | `#/projects`        | Projects list   |
+| `#/repos`           | Repos list      |
 | `#/squad/:id`       | Squad detail    |
 | `#/project/:id`     | Project detail  |
 | `#/person/:id`      | Person detail   |
+| `#/repo/:id`        | Repo detail     |
 | `#/search?q=…`      | Search results  |
 | `#/import`          | Import page     |
 
-## Global navigation bar
+## Fixed top bar
 
-The persistent nav bar shows three links (Squads, People, Projects), each with a zero-padded entity count (e.g. `07`). The active link is highlighted in teal. The search field sits on the right side of the bar.
+A 48 px fixed navigation bar (`position: fixed; top: 0`) spans the full viewport width. Page content is offset by `padding-top: 48px`.
+
+The bar contains (left to right):
+
+1. **Brand wordmark** — "Team Map." in Fraunces, links to `#/`.
+2. **Nav links** — Squads · People · Projects · Repos, each with a zero-padded entity count. Active link highlighted in teal.
+3. **Import button** — opens the import modal overlay.
+4. **Search icon button** — opens the CMD+K search overlay.
+
+No footer is shown.
+
+## CMD+K search overlay
+
+Triggered by clicking the search icon in the topbar, or pressing `⌘K` / `Ctrl+K` anywhere in the app.
+
+Behavior:
+- Renders a blurred full-screen backdrop with a centred input box.
+- Input is auto-focused on open.
+- Results update as the user types, showing up to 8 matches.
+- Each result shows a colored type badge (`.type-badge--{type}`) and the entity name and meta.
+- Arrow keys move selection; `Enter` navigates to the selected entity, or to `#/search?q=…` if no result is selected.
+- `Escape` or clicking the backdrop closes the overlay.
 
 ## Entity links
 
@@ -29,7 +52,7 @@ All cross-references between entities render as `<EntityLink>`. Clicking navigat
 
 ## Back navigation
 
-Each detail page and the search results page shows a "← BACK TO OVERVIEW" button. It calls `navigate(-1)` — going back in browser history — rather than navigating to a fixed route. If there is no history (direct page load), behavior is browser-default.
+Each detail page shows a "← BACK" button. It calls `navigate(-1)` — going back in browser history. If there is no history (direct page load), behavior is browser-default.
 
 ## Not found
 

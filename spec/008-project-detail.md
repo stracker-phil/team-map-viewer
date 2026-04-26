@@ -1,10 +1,10 @@
 # SPEC-008: Project detail
 
-**Status:** Established
+**Status:** Established (updated 2026-04-27 — ProjectDetailMain extraction, ProjectItem hover popup, mobile people fallback uses PersonItem; owner now SquadCard; Repos section added)
 
 ## Overview
 
-The project detail page (`#/project/:id`) shows a project's owning squad, its team structure as an org chart, and source provenance.
+The project detail page (`#/project/:id`) shows a project's owning squad, its team structure as an org chart, and source provenance. The main column is rendered by `<ProjectDetailMain projectId={...} />` — also used (in `compact` mode) as the hover popup on every `ProjectItem`.
 
 ## Header
 
@@ -12,9 +12,13 @@ The project detail page (`#/project/:id`) shows a project's owning squad, its te
 - Title: project name.
 - Sub-title: "Client: {meta}" if `meta` is non-empty.
 
-## Meta section
+## Owner section
 
-Shows the owning squad as a single `EntityLink` with a staleness dot. If no `owned-by` claim exists for the project, displays "No owner recorded yet."
+Shows the owning squad as a `SquadCard` (name + member count + project count, clickable → squad detail). If no `owned-by` claim exists for the project, displays "No owner recorded yet."
+
+## Repos section
+
+If any `belongs-to` claims exist with this project as `object`, a "Repos" section appears immediately after the owner. Lists each repo as a `RepoItem`. Hidden when no repos are linked.
 
 ## Org chart (desktop)
 
@@ -30,7 +34,7 @@ Within each level/column, people are sorted alphabetically by name.
 
 ## Mobile fallback (< 640 px)
 
-The org chart is hidden. A flat `dl-table` grouped by role replaces it. Role order: TL → PM → PO → dev → QA → design → (other). People within each role are comma-separated inline.
+The org chart is hidden. A stacked list grouped by role replaces it. Role order: TL → PM → PO → dev → QA → design → (other). Each group shows a sublabel followed by a `PersonItem` list (same as the compact popup layout).
 
 ## Sources
 

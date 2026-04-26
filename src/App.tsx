@@ -8,26 +8,30 @@ import { ProjectDetail } from './views/ProjectDetail';
 import { PersonDetail } from './views/PersonDetail';
 import { SquadDetail } from './views/SquadDetail';
 import { ImportData } from './views/ImportData';
+import { RepoDetail } from './views/RepoDetail';
+import { ReposList } from './views/ReposList';
 import { SearchResults } from './views/SearchResults';
 import './styles.css';
 
 export function App() {
-  return (
-    <DataProvider>
-      <HashRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<TeamOverview />} />
-            <Route path="/roles" element={<RoleList />} />
-            <Route path="/projects" element={<ProjectsList />} />
-            <Route path="/project/:id" element={<ProjectDetail />} />
-            <Route path="/person/:id" element={<PersonDetail />} />
-            <Route path="/squad/:id" element={<SquadDetail />} />
-            <Route path="/import" element={<ImportData />} />
-            <Route path="/search" element={<SearchResults />} />
-          </Routes>
-        </Layout>
-      </HashRouter>
-    </DataProvider>
-  );
+	return (
+		<DataProvider>
+			<HashRouter>
+				<Layout>
+					<Routes>
+						<Route path='/' element={<TeamOverview />} />
+						<Route path='/roles' element={<RoleList />} />
+						<Route path='/projects' element={<ProjectsList />} />
+						<Route path='/project/:id' element={<ProjectDetail />} />
+						<Route path='/person/:id' element={<PersonDetail />} />
+						<Route path='/squad/:id' element={<SquadDetail />} />
+						<Route path='/repos' element={<ReposList />} />
+						<Route path='/repo/:id' element={<RepoDetail />} />
+						<Route path='/import' element={<ImportData />} />
+						<Route path='/search' element={<SearchResults />} />
+					</Routes>
+				</Layout>
+			</HashRouter>
+		</DataProvider>
+	);
 }

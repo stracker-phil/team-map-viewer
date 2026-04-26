@@ -1,10 +1,10 @@
 # SPEC-007: Squad detail
 
-**Status:** Established
+**Status:** Established (updated 2026-04-26 — removed cross-highlight dim interaction; replaced by EntityPopup hover drill-down on PersonItem)
 
 ## Overview
 
-The squad detail page (`#/squad/:id`) shows a squad's full roster and project portfolio in a three-column layout, with interactive cross-highlighting between the two.
+The squad detail page (`#/squad/:id`) shows a squad's full roster and project portfolio in a three-column layout.
 
 ## Layout
 
@@ -22,21 +22,14 @@ On screens narrower than 768 px the three columns stack vertically.
 - Group label renders as a small monospace section label above the list.
 - Each person row: avatar · name link · staleness dot (from `member-of` claim).
 - People with no `meta` are grouped under "Other".
+- Hovering any person row shows an `EntityPopup` with that person's detail main column (see ADR-016, SPEC-009).
 
 ## Projects column
 
 - Heading: "PROJECTS · {count}" in monospace.
-- One project per line: chevron icon · project name link · staleness dot (from `owned-by` claim).
+- One project per line: project name link · staleness dot (from `owned-by` claim).
 - Sorted alphabetically by project name.
 
-## Cross-highlight interaction
+## No cross-highlight interaction
 
-When the user hovers or focuses any person row, all project rows for projects that person does **not** have a `works-on` claim to are dimmed to `opacity: 0.4`. Project rows the person does work on stay at full opacity.
-
-When the user hovers or focuses any project row, all person rows for people who do **not** have a `works-on` claim to that project are dimmed to `opacity: 0.4`.
-
-- Dimming uses a CSS `transition: opacity 0.15s` for a smooth fade.
-- Only `works-on` claims are used for the connection — `member-of` alone does not create a person↔project link for this interaction.
-- A person with no `works-on` claims causes all projects to dim. A project with no `works-on` claims causes all people to dim.
-- Mouse-leave or blur restores all items to full opacity.
-- Focus events bubble from child links, so keyboard Tab navigation through entity links triggers the same behavior as hovering.
+The hover-dim cross-highlight between people and projects (previously: hovering a person dimmed unrelated projects) has been removed. Discovery is now served by the EntityPopup hover drill-down on PersonItem.

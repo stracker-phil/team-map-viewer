@@ -1,20 +1,20 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { FolderGit2, ArrowLeft } from 'lucide-react';
+import { GitBranch, ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { LinksSidebar } from '../components/LinksSidebar';
-import { ProjectDetailMain } from '../components/ProjectDetailMain';
+import { RepoDetailMain } from '../components/RepoDetailMain';
 
-export function ProjectDetail() {
+export function RepoDetail() {
 	const { id } = useParams<{ id: string }>();
 	const { claims, entityMap: map } = useData();
 	const navigate = useNavigate();
-	const project = id ? map.get(id) : undefined;
+	const repo = id ? map.get(id) : undefined;
 
-	if (!project || project.type !== 'project') {
+	if (!repo || repo.type !== 'repo') {
 		return (
 			<div className='empty-state'>
 				<div className='empty-state__icon'>Not found.</div>
-				<h2 className='empty-state__title'>Project not found</h2>
+				<h2 className='empty-state__title'>Repo not found</h2>
 				<p>ID: {id}</p>
 				<button className='btn-outline' onClick={() => navigate('/')}>Back to overview
 				</button>
@@ -31,18 +31,18 @@ export function ProjectDetail() {
 
 			<div style={{ marginTop: '1.5rem' }}>
 				<div className='entity-header'>
-					<span className='entity-header__icon'><FolderGit2 size={24} /></span>
+					<span className='entity-header__icon'><GitBranch size={24} /></span>
 					<div style={{ flex: 1 }}>
-						<h1 className='entity-header__title'>{project.name}</h1>
-						{project.meta && (
-							<div className='entity-header__meta'>Client: {project.meta}</div>
+						<h1 className='entity-header__title'>{repo.name}</h1>
+						{repo.meta && (
+							<div className='entity-header__meta'>{repo.meta}</div>
 						)}
 					</div>
 				</div>
 
 				<div className='detail-layout'>
-					<ProjectDetailMain projectId={project.id} />
-					<LinksSidebar claims={claims} entityId={project.id} />
+					<RepoDetailMain repoId={repo.id} />
+					<LinksSidebar claims={claims} entityId={repo.id} entity={repo} />
 				</div>
 			</div>
 		</div>

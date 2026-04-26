@@ -1,29 +1,70 @@
 # ADR-012: Editorial design system with web fonts and lucide-react icons
 
-**Status:** Accepted
+**Status:** Amended (UI overhaul, April 2026)
 
 ## Context
 
 The initial UI used a tech-dashboard aesthetic (dark nav bar, indigo accent, cold grays). A reference prototype demonstrated that an editorial / print-inspired design (warm cream background, display serif headings, monospace labels) significantly improved readability and visual hierarchy for an org-chart tool.
 
+A follow-up overhaul (April 2026) moved toward a more functional internal-tool aesthetic while retaining the editorial typography — replacing the large display header with a compact fixed nav bar, shifting to neutral card surfaces, and adding a CMD+K search overlay.
+
 ## Decision
 
-Replace the dashboard design system with an editorial one:
+### Typography and icons (unchanged)
 
-- **Background:** warm cream `#F5F1EA` replacing cold `#f8fafc`.
-- **Accent:** dark teal `#1F4842` replacing indigo.
-- **Fonts (Google Fonts):** Fraunces (display serif for headings and entity names), Geist (body text), JetBrains Mono (eyebrows, counts, labels). Loaded via `<link>` in `index.html`.
-- **Icons:** `lucide-react` package for consistent SVG icons (Search, Upload, Download, entity type icons). Chosen over Unicode glyphs for accessibility, sizing, and visual coherence.
-- **Entity links:** uniform teal underline for all entity types (replaces per-type blue/green/purple coloring). The type distinction comes from context (section label, icon) rather than link color.
-- **Staleness indicator:** small colored dot (6 px circle) replaces the pill badge — less visual noise, title tooltip preserves the data.
-- **Nav:** flat horizontal nav with zero-padded entity counts in mono type, replacing the dark sticky header.
-- **Import:** modal overlay triggered from the header IMPORT button, rather than a dedicated `/import` page navigation.
+- **Fonts (Google Fonts):** Fraunces (display serif for headings), Geist (body), JetBrains Mono (labels, counts). Loaded via `<link>` in `index.html`.
+- **Icons:** `lucide-react` for all SVG icons.
+- **Entity links:** uniform teal underline for all entity types.
 
-CSS is still plain custom-property CSS in `src/styles.css` — no CSS framework added (ADR-008 still applies).
+### Color palette (updated April 2026)
+
+| Token | Value | Use |
+|---|---|---|
+| `--bg` | `#fafafa` | Page background |
+| `--surface` | `#E1E3E2` | Card backgrounds (squad cards, dl-section boxes, project cards) |
+| `--sidebar-bg` | `#FFDBCC` | Links sidebar |
+| `--accent` | `#1F4842` | Teal accent (links, active nav, icons) |
+| `--text` | `#1C1B18` | Body text |
+
+Cards use background color to create depth — no decorative borders. Borders appear only on functional boundaries (topbar, input outlines, modal edges).
+
+### Entity type color badges
+
+Each entity type has a distinct badge color (CSS variables on `:root`):
+
+| Type | Background variable | Text variable |
+|---|---|---|
+| `person` | `--type-person-bg` `#DBEAFE` | `--type-person-text` `#1e40af` |
+| `squad` | `--type-squad-bg` `#DCFCE7` | `--type-squad-text` `#166534` |
+| `project` | `--type-project-bg` `#FEF3C7` | `--type-project-text` `#92400e` |
+| `repo` | `--type-repo-bg` `#EDE9FE` | `--type-repo-text` `#5b21b6` |
+
+Badges rendered as `.type-badge.type-badge--{type}` chips, currently used in the CMD+K search overlay results.
+
+### Navigation (updated April 2026)
+
+- Replaced: large Fraunces display title + horizontal nav strip.
+- New: fixed 48 px topbar (`position: fixed; height: 48px`) containing brand wordmark, nav links with counts, Import button, and search icon. Page content has `padding-top: 48px`.
+- Search trigger: clicking the search icon or pressing `⌘K` / `Ctrl+K` opens a full-screen overlay with blurred backdrop and auto-focused input. `Escape` closes it. The old inline search bar in the nav is gone.
+- No footer — entity/claim counts were redundant with the nav counts.
+
+### Section and page titles
+
+- All list-view page titles are `h1.section-intro__title` with a type icon inline (no separate eyebrow label).
+- All detail-page entity titles are `h1.entity-header__title` (no eyebrow label). Icon is a sibling span, not inline.
+- All eyebrow `<div>` containers removed from all views.
+
+### Cards and layout
+
+- Squad overview cards: simplified to fixed-height clickable card showing name + "X People · Y Projects". Tab UI removed.
+- Detail-page sections: each section (Projects, GH Repos, People, Contributors, Owner) wrapped in a `.dl-section` card with `background: var(--surface)`.
+- Links sidebar: `background: var(--sidebar-bg)` (`#FFDBCC`), `position: sticky` offset by topbar height (`top: calc(48px + 1.5rem)`).
+- Squad cards and project cards use `filter: brightness(0.97)` on hover instead of background swap.
 
 ## Consequences
 
-- Google Fonts adds a DNS lookup and font download; the preconnect hints in `index.html` minimize the FTTP impact.
-- `lucide-react` adds ~220 kB to the JS bundle (gzipped ~70 kB total including all dependencies).
-- The `EntityLink` component no longer accepts a `badge` prop — callers that used type-colored badges must use plain entity links or section-level labeling instead.
-- Import is always a modal when triggered from the nav; the `/import` route still exists as a full page for direct navigation.
+- Google Fonts and `lucide-react` bundle impact unchanged from original.
+- The `EntityLink` component has no type-badge prop — type identity comes from `.type-badge` chips in the CMD+K overlay.
+- The `⌘L` search shortcut is replaced by `⌘K` (more conventional palette-style trigger).
+- Squad cards no longer expand inline — the squad detail page is the only place to see members and projects.
+- CSS custom properties make palette changes trivial: `--bg`, `--surface`, `--sidebar-bg` are the three main surfaces to swap for dark mode or rebranding.

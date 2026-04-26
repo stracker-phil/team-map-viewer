@@ -18,7 +18,10 @@ project-delta,Project Delta,project,internal
 project-epsilon,Project Epsilon,project,TechStart
 team-backend,Backend Team,squad,product
 team-frontend,Frontend Team,squad,product
-team-support,Support Team,squad,support`;
+team-support,Support Team,squad,support
+repo-api,example/api,repo,Core REST API
+repo-web,example/web,repo,Frontend web app
+repo-infra,example/infra,repo,Infrastructure & deployment`;
 
 export const SAMPLE_CLAIMS_CSV = `subject,relation,object,detail,source,verified
 alice,member-of,team-backend,,Wiki: /teams,2026-04-01
@@ -64,23 +67,32 @@ frank,works-on,project-delta,dev,Issue tracker,2026-02-01
 henry,works-on,project-delta,dev,Issue tracker,2026-02-01
 ivan,works-on,project-epsilon,TL,Wiki: /team/epsilon,2026-01-15
 julia,works-on,project-epsilon,dev,Issue tracker,2026-01-15
-kate,works-on,project-epsilon,PM,Wiki: /team/epsilon,2026-01-15`;
-
-export const SAMPLE_LINKS_CSV = `entity_id,type,url,label
-project-alpha,jira,https://example.atlassian.net/browse/ALPHA,Jira: ALPHA
-project-alpha,slack,https://app.slack.com/client/T/C001,#project-alpha
-project-alpha,github,https://github.com/example/project-alpha,example/project-alpha
-project-beta,jira,https://example.atlassian.net/browse/BETA,Jira: BETA
-project-beta,slack,https://app.slack.com/client/T/C002,#project-beta
-project-gamma,jira,https://example.atlassian.net/browse/GAMMA,Jira: GAMMA
-project-gamma,slack,https://app.slack.com/client/T/C003,#project-gamma
-project-gamma,website,https://example.com/gamma,Product page
-project-delta,jira,https://example.atlassian.net/browse/DELTA,Jira: DELTA
-project-epsilon,jira,https://example.atlassian.net/browse/EPS,Jira: EPS
-project-epsilon,slack,https://app.slack.com/client/T/C004,#project-epsilon
-team-backend,confluence,https://example.atlassian.net/wiki/backend,Backend Team Confluence
-team-backend,slack,https://app.slack.com/client/T/C005,#team-backend
-team-backend,slack,https://app.slack.com/client/T/C006,#team-backend-dev
-team-frontend,confluence,https://example.atlassian.net/wiki/frontend,Frontend Team Confluence
-team-frontend,slack,https://app.slack.com/client/T/C007,#team-frontend
-team-support,slack,https://app.slack.com/client/T/C008,#team-support`;
+kate,works-on,project-epsilon,PM,Wiki: /team/epsilon,2026-01-15
+alice,contributes-to,repo-api,,GitHub,2026-04-01
+bob,contributes-to,repo-api,,GitHub,2026-04-01
+charlie,contributes-to,repo-api,,GitHub,2026-04-01
+eve,contributes-to,repo-web,,GitHub,2026-04-01
+frank,contributes-to,repo-web,,GitHub,2026-04-01
+henry,contributes-to,repo-web,,GitHub,2026-04-10
+alice,contributes-to,repo-infra,,GitHub,2026-03-01
+eve,contributes-to,repo-infra,,GitHub,2026-03-01
+project-alpha,link,https://example.atlassian.net/browse/ALPHA,Jira: ALPHA,jira,
+project-alpha,link,https://app.slack.com/client/T/C001,#project-alpha,slack,
+project-alpha,link,https://github.com/example/project-alpha,example/project-alpha,github,
+project-beta,link,https://example.atlassian.net/browse/BETA,Jira: BETA,jira,
+project-beta,link,https://app.slack.com/client/T/C002,#project-beta,slack,
+project-gamma,link,https://example.atlassian.net/browse/GAMMA,Jira: GAMMA,jira,
+project-gamma,link,https://app.slack.com/client/T/C003,#project-gamma,slack,
+project-gamma,link,https://example.com/gamma,Product page,website,
+project-delta,link,https://example.atlassian.net/browse/DELTA,Jira: DELTA,jira,
+project-epsilon,link,https://example.atlassian.net/browse/EPS,Jira: EPS,jira,
+project-epsilon,link,https://app.slack.com/client/T/C004,#project-epsilon,slack,
+team-backend,link,https://example.atlassian.net/wiki/backend,Backend Team Confluence,confluence,
+team-backend,link,https://app.slack.com/client/T/C005,#team-backend,slack,
+team-backend,link,https://app.slack.com/client/T/C006,#team-backend-dev,slack,
+team-frontend,link,https://example.atlassian.net/wiki/frontend,Frontend Team Confluence,confluence,
+team-frontend,link,https://app.slack.com/client/T/C007,#team-frontend,slack,
+team-support,link,https://app.slack.com/client/T/C008,#team-support,slack,
+repo-api,link,https://github.com/example/api,example/api,github,
+repo-web,link,https://github.com/example/web,example/web,github,
+repo-infra,link,https://github.com/example/infra,example/infra,github,`;

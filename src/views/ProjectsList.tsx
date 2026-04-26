@@ -1,82 +1,121 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FolderGit2 } from 'lucide-react';
+import { ProjectItem } from '../components/ProjectItem.tsx';
 import { useData } from '../context/DataContext';
-import { byType, filterClaims, entityMap } from '../utils/derive';
 
 export function ProjectsList() {
-  const { entities, claims } = useData();
-  const navigate = useNavigate();
-  const allProjects = byType(entities, 'project');
-  const map = entityMap(entities);
+	const { projects, teamSize, squadOf, entityMap } = useData();
+	const navigate = useNavigate();
 
-  const teamSize = useMemo(() => {
-    const m: Record<string, number> = {};
-    filterClaims(claims, { relation: 'works-on' }).forEach(c => {
-      m[c.object] = (m[c.object] ?? 0) + 1;
-    });
-    return m;
-  }, [claims]);
+	const [ownerFilter, setOwnerFilter] = useState<string | null>(null);
 
-  const projects = useMemo(
-    () => allProjects.filter(p => (teamSize[p.id] ?? 0) > 0),
-    [allProjects, teamSize],
-  );
+	// Only show projects that have at least one team member
+	const activeProjects = useMemo(
+		() => projects.filter(p => (teamSize.get(p.id) ?? 0) > 0),
+		[projects, teamSize],
+	);
 
-  const squadOf = useMemo(() => {
-    const m: Record<string, string> = {};
-    filterClaims(claims, { relation: 'owned-by' }).forEach(c => {
-      m[c.subject] = c.object;
-    });
-    return m;
-  }, [claims]);
+	const allOwners = useMemo(() => {
+		const counts = new Map<string, number>();
+		activeProjects.forEach(p => {
+			const ownerId = squadOf.get(p.id);
+			if (!ownerId) return;
+			counts.set(ownerId, (counts.get(ownerId) ?? 0) + 1);
+		});
+		return [...counts.entries()]
+			.map(([id, count]) => ({ squad: entityMap.get(id), count }))
+			.filter((x): x is {
+				squad: NonNullable<ReturnType<typeof entityMap.get>>;
+				count: number
+			} => !!x.squad)
+			.sort((a, b) => b.count - a.count);
+	}, [activeProjects, squadOf, entityMap]);
 
-  if (projects.length === 0) {
-    return (
-      <div className="empty-state">
-        <div className="empty-state__icon">No projects yet.</div>
-        <h2 className="empty-state__title">No projects yet</h2>
-        <p>Import your CSV files to see the project portfolio.</p>
-        <button className="btn-primary" onClick={() => navigate('/import')}>Import data</button>
-      </div>
-    );
-  }
+	const unownedCount = useMemo(
+		() => activeProjects.filter(p => !squadOf.has(p.id)).length,
+		[activeProjects, squadOf],
+	);
 
-  return (
-    <div>
-      <div className="section-intro">
-        <div className="section-intro__eyebrow">PORTFOLIO</div>
-        <h2 className="section-intro__title">Projects</h2>
-      </div>
+	const filtered = useMemo(() => {
+		if (!ownerFilter) return activeProjects;
+		if (ownerFilter === '__none__') return activeProjects.filter(p => !squadOf.has(p.id));
+		return activeProjects.filter(p => squadOf.get(p.id) === ownerFilter);
+	}, [activeProjects, ownerFilter, squadOf]);
 
-      <div className="projects-grid">
-        {projects.map(p => {
-          const ownerEntity = squadOf[p.id] ? map.get(squadOf[p.id]) : undefined;
-          return (
-            <button
-              key={p.id}
-              className="project-card"
-              onClick={() => navigate(`/project/${p.id}`)}
-            >
-              <div className="project-card__top">
-                <div style={{ flex: 1 }}>
-                  {p.meta && (
-                    <div className="project-card__eyebrow">{p.meta}</div>
-                  )}
-                  <h3 className="project-card__name">{p.name}</h3>
-                </div>
-                <span className="project-card__icon"><FolderGit2 size={18} /></span>
-              </div>
-              <div className="project-card__footer">
-                <span>TEAM · {String(teamSize[p.id] ?? 0).padStart(2, '0')}</span>
-                {ownerEntity && (
-                  <span>OWNER · {ownerEntity.name.toUpperCase()}</span>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+	if (activeProjects.length === 0) {
+		return (
+			<div className='empty-state'>
+				<div className='empty-state__icon'>No projects yet.</div>
+				<h2 className='empty-state__title'>No projects yet</h2>
+				<p>Import your CSV files to see the project portfolio.</p>
+				<button className='btn-primary' onClick={() => navigate('/import')}>Import data
+				</button>
+			</div>
+		);
+	}
+
+	return (
+		<div>
+			<div className='section-intro'>
+				<h1 className='section-intro__title'>
+					<FolderGit2 size={26} />
+					Projects
+				</h1>
+			</div>
+
+			{allOwners.length > 0 && (
+				<div className='role-filters'>
+					<button
+						className={`role-filter-btn${ownerFilter === null ? ' active' : ''}`}
+						onClick={() => setOwnerFilter(null)}
+					>
+						ALL · {String(activeProjects.length).padStart(2, '0')}
+					</button>
+					{allOwners.map(({ squad, count }) => (
+						<button
+							key={squad.id}
+							className={`role-filter-btn${ownerFilter === squad.id ? ' active' : ''}`}
+							onClick={() => setOwnerFilter(ownerFilter === squad.id ? null : squad.id)}
+						>
+							{squad.name.toUpperCase()} · {String(count).padStart(2, '0')}
+						</button>
+					))}
+					{unownedCount > 0 && (
+						<button
+							className={`role-filter-btn${ownerFilter === '__none__' ? ' active' : ''}`}
+							onClick={() => setOwnerFilter(ownerFilter === '__none__' ? null : '__none__')}
+						>
+							OTHER · {String(unownedCount).padStart(2, '0')}
+						</button>
+					)}
+				</div>
+			)}
+
+			<table className='entity-table'>
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Team size</th>
+					<th>Owner</th>
+				</tr>
+				</thead>
+				<tbody>
+				{filtered.map(p => {
+					const ownerId = squadOf.get(p.id);
+					const ownerEntity = ownerId ? entityMap.get(ownerId) : undefined;
+					return (
+						<tr key={p.id} onClick={() => navigate(`/project/${p.id}`)}>
+							<td className='entity-table__name'>
+								<ProjectItem key={p.id} project={p} />
+							</td>
+							<td className='entity-table__mono'>{teamSize.get(p.id) ?? 0}</td>
+							<td className='entity-table__mono'>{ownerEntity?.name ?? '—'}</td>
+						</tr>
+					);
+				})}
+				</tbody>
+			</table>
+		</div>
+	);
 }

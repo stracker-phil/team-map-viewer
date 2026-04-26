@@ -1,41 +1,31 @@
 # SPEC-006: Squad overview
 
-**Status:** Established
+**Status:** Established (updated April 2026 — simplified cards, tabs removed; updated 2026-04-27 — hover popup added, dynamic stats)
 
 ## Overview
 
-The home page (`#/`) shows all squads as cards in a 2-column grid. Each card lets the user toggle between a People view and a Projects view.
+The home page (`#/`) shows all squads as cards in a 2-column grid.
 
 ## Grid layout
 
-- All squads are shown in a 2-column grid, sorted in the order they appear in `entities.csv`.
+- All squads are shown in a 2-column grid with 20 px gap, sorted in the order they appear in `entities.csv`.
 - On screens narrower than 768 px the grid collapses to a single column.
 
 ## Squad card
 
-Each card shows:
-- Squad `meta` as an eyebrow label (e.g. "support") if non-empty.
-- Squad name as a large clickable heading that navigates to the squad detail page.
-- A tab bar with **PEOPLE** tab always visible, and **PROJECTS** tab only if the squad has at least one project with `works-on` members.
+Each card is a clickable button that navigates to `#/squad/:id` on click. Hovering for 1000 ms opens an `EntityPopup` showing `SquadDetailMain` in compact mode — members grouped by role and owned projects with ≥1 member. The popup title row is a nav link to the squad detail page.
 
-### Tab: People (default)
+The card shows:
+- Squad `meta` as a small uppercase monospace label above the name (only if `meta` is non-empty).
+- Squad name in Fraunces serif.
+- A stats line: `{N} People · {M} Projects` in uppercase monospace. People = count of `member-of` claims; Projects = count of `owned-by` projects with ≥1 `works-on` member. Stats items are dynamic — items with 0 count are omitted.
 
-- Active by default when the card first renders.
-- Lists all `member-of` claims for that squad, one person per line.
-- Each row: avatar · name · staleness dot (from `member-of` claim's `verified` date) · role title in muted monospace. Role title is taken from the person's `role` claim if present, otherwise falls back to `entity.meta`.
-- Sorted alphabetically by person name.
+There are no tabs, no expanded member or project lists inline. The squad detail page is the place for the full roster.
 
-### Tab: Projects
+## Empty state
 
-- Only shown when the squad has ≥1 project with at least one `works-on` member (projects with 0 members are hidden everywhere).
-- Lists all `owned-by` claims where the squad is the object, filtered to projects with ≥1 `works-on` member, one project per line.
-- Each row: chevron icon · project name · project meta (client) in muted monospace.
-- Sorted alphabetically by project name.
+If no squad entities exist, shows "No teams yet" with an "Import data" button.
 
-### Empty states
+## Reusability
 
-- "No members recorded yet." when the People tab has no data.
-
-## Tab persistence
-
-Tab state is local to each card and is not persisted. Navigating away and back resets all cards to the People tab.
+The `SquadCard` component (`src/components/SquadCard.tsx`) is shared between the overview grid and the person detail page (where a person's squad memberships are shown as full squad cards).
