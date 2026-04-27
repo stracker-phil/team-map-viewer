@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { GitBranch } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
 import { PersonItem } from './PersonItem';
 import { ProjectItem } from './ProjectItem';
@@ -56,6 +57,7 @@ function ContributorsBlock({ contributors }: ContributorsBlockProps) {
 
 export function RepoDetailMain({ repoId, compact }: Props) {
 	const { claims, entityMap: map } = useData();
+	const { starred, isStarred } = useStar();
 	const repo = map.get(repoId);
 
 	const contributorClaims = useMemo(
@@ -67,8 +69,11 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 			contributorClaims
 				.map(c => ({ person: map.get(c.subject), claim: c }))
 				.filter((x): x is { person: Entity; claim: Claim } => !!x.person)
-				.sort((a, b) => a.person.name.localeCompare(b.person.name)),
-		[contributorClaims, map],
+				.sort((a, b) =>
+					Number(isStarred(b.person.id)) - Number(isStarred(a.person.id)) ||
+					a.person.name.localeCompare(b.person.name),
+				),
+		[contributorClaims, map, starred],
 	);
 
 	const projectClaims = useMemo(
@@ -82,8 +87,11 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 				project: Entity;
 				claim: Claim
 			} => !!x.project && x.project.type === 'project')
-			.sort((a, b) => a.project.name.localeCompare(b.project.name)),
-		[projectClaims, map],
+			.sort((a, b) =>
+				Number(isStarred(b.project.id)) - Number(isStarred(a.project.id)) ||
+				a.project.name.localeCompare(b.project.name),
+			),
+		[projectClaims, map, starred],
 	);
 
 	if (compact) {

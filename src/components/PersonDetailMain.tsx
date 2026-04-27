@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
 import { SquadCard } from './SquadCard';
 import { PersonItem } from './PersonItem';
@@ -74,6 +75,7 @@ interface PeopleBlockProps {
 	managesByType: Map<string, { report: Entity; claim: Claim }[]>;
 	reportTypes: string[];
 	managesTypes: string[];
+	isStarred: (id: string) => boolean;
 }
 
 function PeopleBlock({
@@ -81,6 +83,7 @@ function PeopleBlock({
 	                     managesByType,
 	                     reportTypes,
 	                     managesTypes,
+	                     isStarred,
                      }: PeopleBlockProps) {
 	if (!reportTypes.length && !managesTypes.length) return null;
 	return (
@@ -102,7 +105,10 @@ function PeopleBlock({
 						<div className='pdm-people__key'>{MANAGES_TYPE_LABELS[type] || type}</div>
 						<ul className='entity-list'>
 							{managesByType.get(type)!
-								.sort((a, b) => a.report.name.localeCompare(b.report.name))
+								.sort((a, b) =>
+									Number(isStarred(b.report.id)) - Number(isStarred(a.report.id)) ||
+									a.report.name.localeCompare(b.report.name),
+								)
 								.map(({ report, claim }) => (
 									<PersonItem key={report.id} person={report} claim={claim} />
 								))}
@@ -116,6 +122,7 @@ function PeopleBlock({
 
 export function PersonDetailMain({ personId, compact }: Props) {
 	const { claims, entityMap: map, personRoleMap } = useData();
+	const { starred, isStarred } = useStar();
 
 	const reportsClaims = useMemo(
 		() => filterClaims(claims, { subject: personId, relation: 'reports-to' }),
@@ -176,8 +183,11 @@ export function PersonDetailMain({ personId, compact }: Props) {
 		() => teamClaims
 			.map(c => ({ squad: map.get(c.object), claim: c }))
 			.filter((x): x is { squad: Entity; claim: Claim } => !!x.squad)
-			.sort((a, b) => a.squad.name.localeCompare(b.squad.name)),
-		[teamClaims, map],
+			.sort((a, b) =>
+				Number(isStarred(b.squad.id)) - Number(isStarred(a.squad.id)) ||
+				a.squad.name.localeCompare(b.squad.name),
+			),
+		[teamClaims, map, starred],
 	);
 
 	const projects = useMemo(
@@ -187,8 +197,11 @@ export function PersonDetailMain({ personId, compact }: Props) {
 				project: Entity;
 				claim: Claim
 			} => !!x.project && x.project.type === 'project')
-			.sort((a, b) => a.project.name.localeCompare(b.project.name)),
-		[projectClaims, map],
+			.sort((a, b) =>
+				Number(isStarred(b.project.id)) - Number(isStarred(a.project.id)) ||
+				a.project.name.localeCompare(b.project.name),
+			),
+		[projectClaims, map, starred],
 	);
 
 	const repos = useMemo(() => {
@@ -204,8 +217,11 @@ export function PersonDetailMain({ personId, compact }: Props) {
 				seen.add(x.repo.id);
 				return true;
 			})
-			.sort((a, b) => a.repo.name.localeCompare(b.repo.name));
-	}, [repoClaims, projectClaims, map]);
+			.sort((a, b) =>
+				Number(isStarred(b.repo.id)) - Number(isStarred(a.repo.id)) ||
+				a.repo.name.localeCompare(b.repo.name),
+			);
+	}, [repoClaims, projectClaims, map, starred]);
 
 	const isEmpty = squads.length === 0 && projects.length === 0 && repos.length === 0 &&
 		reportTypes.length === 0 && managesTypes.length === 0;
@@ -219,6 +235,7 @@ export function PersonDetailMain({ personId, compact }: Props) {
 		managesByType,
 		reportTypes,
 		managesTypes,
+		isStarred,
 	};
 
 	if (compact) {

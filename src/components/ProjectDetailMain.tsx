@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FolderGit2, FileText } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
 import { OrgChart } from './OrgChart';
 import { SquadCard } from './SquadCard';
@@ -39,9 +40,10 @@ function OwnerBlock({ owner }: { owner: Entity }) {
 interface PeopleContentProps {
 	grouped: Record<string, Claim[]>;
 	entityMap: Map<string, Entity>;
+	isStarred: (id: string) => boolean;
 }
 
-function PeopleContent({ grouped, entityMap: map }: PeopleContentProps) {
+function PeopleContent({ grouped, entityMap: map, isStarred }: PeopleContentProps) {
 	const hasAny = ROLE_ORDER.some(r => grouped[r]?.length);
 	if (!hasAny) return <p className='dl-table__empty'>No team members recorded yet.</p>;
 	return (
@@ -50,7 +52,10 @@ function PeopleContent({ grouped, entityMap: map }: PeopleContentProps) {
 				const people = grouped[r]
 					.map(c => ({ person: map.get(c.subject), claim: c }))
 					.filter((x): x is { person: Entity; claim: Claim } => !!x.person)
-					.sort((a, b) => a.person.name.localeCompare(b.person.name));
+					.sort((a, b) =>
+						Number(isStarred(b.person.id)) - Number(isStarred(a.person.id)) ||
+						a.person.name.localeCompare(b.person.name),
+					);
 				if (!people.length) return null;
 				return (
 					<React.Fragment key={r || '_other'}>
@@ -94,6 +99,7 @@ function PeopleBlock(props: PeopleContentProps) {
 
 export function ProjectDetailMain({ projectId, compact }: Props) {
 	const { claims, entityMap: map } = useData();
+	const { starred, isStarred } = useStar();
 	const project = map.get(projectId);
 
 	const ownerClaim = useMemo(
@@ -133,12 +139,15 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 		() => repoClaims
 			.map(c => ({ repo: map.get(c.subject), claim: c }))
 			.filter((x): x is { repo: Entity; claim: Claim } => !!x.repo && x.repo.type === 'repo')
-			.sort((a, b) => a.repo.name.localeCompare(b.repo.name)),
-		[repoClaims, map],
+			.sort((a, b) =>
+				Number(isStarred(b.repo.id)) - Number(isStarred(a.repo.id)) ||
+				a.repo.name.localeCompare(b.repo.name),
+			),
+		[repoClaims, map, starred],
 	);
 
 	const owningTeam = ownerClaim ? map.get(ownerClaim.object) : undefined;
-	const peopleProps: PeopleContentProps = { grouped, entityMap: map };
+	const peopleProps: PeopleContentProps = { grouped, entityMap: map, isStarred };
 
 	if (compact) {
 		return (

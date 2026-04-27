@@ -13,6 +13,7 @@ import { Entity, Claim } from '../types';
 export function SquadDetail() {
 	const { id } = useParams<{ id: string }>();
 	const { claims, entityMap: map, teamSize } = useData();
+	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 	const squad = id ? map.get(id) : undefined;
 
@@ -38,9 +39,12 @@ export function SquadDetail() {
 			.sort((a, b) => a[0].localeCompare(b[0]))
 			.map(([role, items]) => ({
 				role,
-				items: items.sort((a, b) => a.person.name.localeCompare(b.person.name)),
+				items: items.sort((a, b) =>
+					Number(isStarred(b.person.id)) - Number(isStarred(a.person.id)) ||
+					a.person.name.localeCompare(b.person.name),
+				),
 			}));
-	}, [memberClaims, map]);
+	}, [memberClaims, map, starred]);
 
 	const ownedProjects = useMemo(
 		() => ownedClaims
@@ -49,8 +53,11 @@ export function SquadDetail() {
 				project: Entity;
 				claim: Claim
 			} => !!x.project && (teamSize.get(x.project.id) ?? 0) > 0)
-			.sort((a, b) => a.project.name.localeCompare(b.project.name)),
-		[ownedClaims, map, teamSize],
+			.sort((a, b) =>
+				Number(isStarred(b.project.id)) - Number(isStarred(a.project.id)) ||
+				a.project.name.localeCompare(b.project.name),
+			),
+		[ownedClaims, map, teamSize, starred],
 	);
 
 	if (!squad || squad.type !== 'squad') {
