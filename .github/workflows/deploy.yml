@@ -16,6 +16,8 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build
+      # Pushes dist/ to the gh-pages branch. In GitHub → Settings → Pages,
+      # set Source to "Deploy from branch" → gh-pages → / (root).
       - uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
