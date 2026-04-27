@@ -372,7 +372,7 @@ body {
 	padding: 0;
 	transition: all 0.2s;
 	text-align: left;
-	display: block;
+	display: inline-block;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -658,7 +658,9 @@ body {
 
 	a:hover,
 	a:focus {
-		background: transparent;
+		&, &:before {
+			background: transparent;
+		}
 	}
 }
 
@@ -921,15 +923,6 @@ body {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
-	padding-bottom: 0.5rem;
-	margin-bottom: 1rem;
-	border-bottom: 1px solid var(--border);
-}
-
-.role-group__title {
-	font-family: 'Fraunces', Georgia, serif;
-	font-size: 1.25rem;
-	font-weight: 300;
 }
 
 .role-group__meta {

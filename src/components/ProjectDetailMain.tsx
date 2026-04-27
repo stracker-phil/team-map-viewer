@@ -157,12 +157,14 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 					<span className='font-display popup__name'>{project?.name ?? projectId}</span>
 					{project?.meta && <span className='popup__meta'>Client: {project.meta}</span>}
 				</Link>
-				<div className='popup__body'>
+				<div className='popup__body popup__body--split'>
 					<div className='popup__col'>
 						{owningTeam && (
 							<OwnerBlock owner={owningTeam} />
 						)}
 						<ReposBlock repos={repos} />
+					</div>
+					<div className='popup__col'>
 						<PeopleBlock {...peopleProps} />
 					</div>
 				</div>

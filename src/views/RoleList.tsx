@@ -79,12 +79,12 @@ export function RoleList() {
 
 			<div>
 				{grouped.map(([role, list]) => (
-					<div key={role} className='role-group'>
-						<div className='role-group__header'>
-							<h3 className='role-group__title'>{role}</h3>
+					<div key={role} className='role-group block'>
+						<div className='role-group__header block__heading'>
+							<span>{role}</span>
 							<span className='role-group__meta'>
-                {role.toUpperCase()} · {String(list.length).padStart(2, '0')}
-              </span>
+                				{String(list.length).padStart(2, '0')}
+              				</span>
 						</div>
 						<ul className='tile-grid--auto'>
 							{list.map(p => (
