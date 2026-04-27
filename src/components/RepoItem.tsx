@@ -3,6 +3,7 @@ import { EntityLink } from './EntityLink';
 import { StaleTag } from './StaleTag';
 import { EntityPopup } from './EntityPopup';
 import { RepoDetailMain } from './RepoDetailMain';
+import { StarIndicator } from './StarIndicator';
 
 interface Props {
 	repo: Entity;
@@ -21,6 +22,7 @@ export function RepoItem({ repo, claim = null, detail = null, style, disablePopu
 			disabled={disablePopup}
 			popup={<RepoDetailMain repoId={repo.id} compact />}
 		>
+			<StarIndicator entityId={repo.id} />
 			<EntityLink entity={repo} />
 			{detail && <span className='claim-item__detail'>{detail}</span>}
 			{claim && <StaleTag verified={claim.verified} />}

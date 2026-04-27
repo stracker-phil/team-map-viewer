@@ -3,6 +3,7 @@ import { FolderGit2, ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { LinksSidebar } from '../components/LinksSidebar';
 import { ProjectDetailMain } from '../components/ProjectDetailMain';
+import { StarButton } from '../components/StarButton';
 
 export function ProjectDetail() {
 	const { id } = useParams<{ id: string }>();
@@ -38,6 +39,7 @@ export function ProjectDetail() {
 							<div className='entity-header__meta'>Client: {project.meta}</div>
 						)}
 					</div>
+					<StarButton entityId={project.id} size='lg' />
 				</div>
 
 				<div className='detail-layout'>

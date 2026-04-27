@@ -1,11 +1,19 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 import { SquadCard } from '../components/SquadCard';
 
 export function TeamOverview() {
 	const { squads } = useData();
+	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
+
+	const sorted = useMemo(
+		() => [...squads].sort((a, b) => Number(isStarred(b.id)) - Number(isStarred(a.id))),
+		[squads, starred],
+	);
 
 	if (squads.length === 0) {
 		return (
@@ -28,7 +36,7 @@ export function TeamOverview() {
 				</h1>
 			</div>
 			<div className='squad-grid'>
-				{squads.map(squad => (
+				{sorted.map(squad => (
 					<SquadCard key={squad.id} squad={squad} />
 				))}
 			</div>

@@ -3,6 +3,7 @@ import { EntityLink } from './EntityLink';
 import { StaleTag } from './StaleTag';
 import { EntityPopup } from './EntityPopup';
 import { ProjectDetailMain } from './ProjectDetailMain';
+import { StarIndicator } from './StarIndicator';
 
 interface Props {
 	project: Entity;
@@ -21,6 +22,7 @@ export function ProjectItem({ project, claim = null, detail = null, style, disab
 			disabled={disablePopup}
 			popup={<ProjectDetailMain projectId={project.id} compact />}
 		>
+			<StarIndicator entityId={project.id} />
 			<EntityLink entity={project} />
 			{detail && <span className='claim-item__detail'>{detail}</span>}
 			{claim && <StaleTag verified={claim.verified} />}

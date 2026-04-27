@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
+import { StarProvider } from './context/StarContext';
 import { Layout } from './components/Layout';
 import { TeamOverview } from './views/TeamOverview';
 import { RoleList } from './views/RoleList';
@@ -15,6 +16,7 @@ import './styles.css';
 
 export function App() {
 	return (
+		<StarProvider>
 		<DataProvider>
 			<HashRouter>
 				<Layout>
@@ -33,5 +35,6 @@ export function App() {
 				</Layout>
 			</HashRouter>
 		</DataProvider>
+		</StarProvider>
 	);
 }

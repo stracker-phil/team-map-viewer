@@ -2,11 +2,13 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 import { PersonItem } from '../components/PersonItem';
 import { Entity } from '../types';
 
 export function RoleList() {
 	const { people } = useData();
+	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
 	const allRoles = useMemo(() => {
@@ -28,8 +30,13 @@ export function RoleList() {
 			if (!m.has(r)) m.set(r, []);
 			m.get(r)!.push(p);
 		});
-		return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-	}, [people, roleFilter]);
+		return [...m.entries()]
+			.sort((a, b) => a[0].localeCompare(b[0]))
+			.map(([role, list]) => [
+				role,
+				[...list].sort((a, b) => Number(isStarred(b.id)) - Number(isStarred(a.id))),
+			] as [string, Entity[]]);
+	}, [people, roleFilter, starred]);
 
 	if (people.length === 0) {
 		return (

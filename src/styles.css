@@ -851,6 +851,48 @@ body {
 	font-size: 14px;
 }
 
+/* ── Star indicator (read-only, shown in lists) ── */
+
+.star-indicator {
+	color: var(--amber);
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	line-height: 1;
+}
+
+.squad-card__header .star-indicator {
+	margin-right: 0.5rem;
+}
+
+/* ── Star button ── */
+
+.star-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	color: var(--muted-light);
+	display: inline-flex;
+	align-items: center;
+	line-height: 1;
+	flex-shrink: 0;
+	transition: color 0.15s;
+}
+
+.star-btn--lg {
+	padding: 6px;
+	margin-top: 0.25rem;
+}
+
+.star-btn--starred {
+	color: var(--amber);
+}
+
+.star-btn:hover {
+	color: var(--amber);
+}
+
 /* ── Entity popup ── */
 
 .entity-popup-trigger {

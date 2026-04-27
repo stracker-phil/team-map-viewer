@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { FolderGit2 } from 'lucide-react';
 import { ProjectItem } from '../components/ProjectItem.tsx';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 
 export function ProjectsList() {
 	const { projects, teamSize, squadOf, entityMap } = useData();
+	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
 	const [ownerFilter, setOwnerFilter] = useState<string | null>(null);
@@ -38,10 +40,11 @@ export function ProjectsList() {
 	);
 
 	const filtered = useMemo(() => {
-		if (!ownerFilter) return activeProjects;
-		if (ownerFilter === '__none__') return activeProjects.filter(p => !squadOf.has(p.id));
-		return activeProjects.filter(p => squadOf.get(p.id) === ownerFilter);
-	}, [activeProjects, ownerFilter, squadOf]);
+		let list = activeProjects;
+		if (ownerFilter === '__none__') list = activeProjects.filter(p => !squadOf.has(p.id));
+		else if (ownerFilter) list = activeProjects.filter(p => squadOf.get(p.id) === ownerFilter);
+		return [...list].sort((a, b) => Number(isStarred(b.id)) - Number(isStarred(a.id)));
+	}, [activeProjects, ownerFilter, squadOf, starred]);
 
 	if (activeProjects.length === 0) {
 		return (

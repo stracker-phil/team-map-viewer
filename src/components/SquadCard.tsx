@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import { filterClaims } from '../utils/derive';
 import { EntityPopup } from './EntityPopup';
 import { SquadDetailMain } from './SquadDetailMain';
+import { StarIndicator } from './StarIndicator';
 import { Entity } from '../types';
 
 interface Props {
@@ -47,7 +48,10 @@ export function SquadCard({ squad }: Props) {
 					{squad.meta && (
 						<div className='squad-card__meta-label'>{squad.meta}</div>
 					)}
-					<div className='squad-card__name'>{squad.name}</div>
+					<div className='squad-card__name'>
+						<StarIndicator entityId={squad.id} />
+						{squad.name}
+					</div>
 				</div>
 				<span className='squad-card__icon'><Boxes size={20} /></span>
 			</div>

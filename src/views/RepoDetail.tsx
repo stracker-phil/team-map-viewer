@@ -3,6 +3,7 @@ import { GitBranch, ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { LinksSidebar } from '../components/LinksSidebar';
 import { RepoDetailMain } from '../components/RepoDetailMain';
+import { StarButton } from '../components/StarButton';
 
 export function RepoDetail() {
 	const { id } = useParams<{ id: string }>();
@@ -38,6 +39,7 @@ export function RepoDetail() {
 							<div className='entity-header__meta'>{repo.meta}</div>
 						)}
 					</div>
+					<StarButton entityId={repo.id} size='lg' />
 				</div>
 
 				<div className='detail-layout'>

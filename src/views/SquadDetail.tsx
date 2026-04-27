@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Boxes, ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
 import { LinksSidebar } from '../components/LinksSidebar';
 import { PersonItem } from '../components/PersonItem';
 import { ProjectItem } from '../components/ProjectItem';
+import { StarButton } from '../components/StarButton';
 import { Entity, Claim } from '../types';
 
 export function SquadDetail() {
@@ -78,6 +80,7 @@ export function SquadDetail() {
 							<div className='entity-header__meta'>{squad.meta}</div>
 						)}
 					</div>
+					<StarButton entityId={squad.id} size='lg' />
 				</div>
 
 				<div className='squad-detail-layout'>

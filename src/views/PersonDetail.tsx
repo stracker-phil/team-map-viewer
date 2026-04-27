@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext';
 import { Avatar } from '../components/Avatar';
 import { LinksSidebar } from '../components/LinksSidebar';
 import { PersonDetailMain } from '../components/PersonDetailMain';
+import { StarButton } from '../components/StarButton';
 
 export function PersonDetail() {
 	const { id } = useParams<{ id: string }>();
@@ -41,6 +42,7 @@ export function PersonDetail() {
 							</div>
 						)}
 					</div>
+					<StarButton entityId={person.id} size='lg' />
 				</div>
 
 				<div className='detail-layout'>

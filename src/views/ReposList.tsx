@@ -1,12 +1,19 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GitBranch } from 'lucide-react';
 import { RepoItem } from '../components/RepoItem.tsx';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext';
 
 export function ReposList() {
 	const { repos, contributorCount } = useData();
+	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
+
+	const sorted = useMemo(
+		() => [...repos].sort((a, b) => Number(isStarred(b.id)) - Number(isStarred(a.id))),
+		[repos, starred],
+	);
 
 	if (repos.length === 0) {
 		return (
@@ -37,7 +44,7 @@ export function ReposList() {
 				</tr>
 				</thead>
 				<tbody>
-				{repos.map(r => (
+				{sorted.map(r => (
 					<tr key={r.id} onClick={() => navigate(`/repo/${r.id}`)}>
 						<td className='entity-table__name'>
 							<RepoItem key={r.id} repo={r} />
