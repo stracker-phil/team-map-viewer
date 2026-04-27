@@ -7,6 +7,7 @@ import { filterClaims } from '../utils/derive';
 import { LinksSidebar } from '../components/LinksSidebar';
 import { PersonItem } from '../components/PersonItem';
 import { ProjectItem } from '../components/ProjectItem';
+import { RepoItem } from '../components/RepoItem';
 import { StarButton } from '../components/StarButton';
 import { Entity, Claim } from '../types';
 
@@ -52,13 +53,44 @@ export function SquadDetail() {
 			.filter((x): x is {
 				project: Entity;
 				claim: Claim
-			} => !!x.project && (teamSize.get(x.project.id) ?? 0) > 0)
+			} => !!x.project && x.project.type === 'project' && (teamSize.get(x.project.id) ?? 0) > 0)
 			.sort((a, b) =>
 				Number(isStarred(b.project.id)) - Number(isStarred(a.project.id)) ||
 				a.project.name.localeCompare(b.project.name),
 			),
 		[ownedClaims, map, teamSize, starred],
 	);
+
+	const ownedRepos = useMemo(() => {
+		const seen = new Set<string>();
+		const result: { repo: Entity; claim: Claim }[] = [];
+
+		// direct: repo owned-by squad
+		for (const c of ownedClaims) {
+			const repo = map.get(c.subject);
+			if (repo?.type === 'repo' && !seen.has(repo.id)) {
+				seen.add(repo.id);
+				result.push({ repo, claim: c });
+			}
+		}
+
+		// indirect: repo belongs-to project owned-by squad
+		const ownedProjectIds = new Set(ownedProjects.map(x => x.project.id));
+		const belongsClaims = filterClaims(claims, { relation: 'belongs-to' });
+		for (const c of belongsClaims) {
+			if (!ownedProjectIds.has(c.object)) continue;
+			const repo = map.get(c.subject);
+			if (repo?.type === 'repo' && !seen.has(repo.id)) {
+				seen.add(repo.id);
+				result.push({ repo, claim: c });
+			}
+		}
+
+		return result.sort((a, b) =>
+			Number(isStarred(b.repo.id)) - Number(isStarred(a.repo.id)) ||
+			a.repo.name.localeCompare(b.repo.name),
+		);
+	}, [ownedClaims, ownedProjects, claims, map, starred]);
 
 	if (!squad || squad.type !== 'squad') {
 		return (
@@ -113,18 +145,33 @@ export function SquadDetail() {
 						)}
 					</div>
 
-					<div className='dl-section'>
-						<div className='dl-section__heading'>
-							Projects · {String(ownedProjects.length).padStart(2, '0')}
+					<div>
+						<div className='dl-section'>
+							<div className='dl-section__heading'>
+								Projects · {String(ownedProjects.length).padStart(2, '0')}
+							</div>
+							{ownedProjects.length === 0 ? (
+								<p className='dl-table__empty'>No owned projects recorded yet.</p>
+							) : (
+								<ul className='entity-list'>
+									{ownedProjects.map(({ project, claim }) => (
+										<ProjectItem key={project.id} project={project} claim={claim} />
+									))}
+								</ul>
+							)}
 						</div>
-						{ownedProjects.length === 0 ? (
-							<p className='dl-table__empty'>No owned projects recorded yet.</p>
-						) : (
-							<ul className='entity-list'>
-								{ownedProjects.map(({ project, claim }) => (
-									<ProjectItem key={project.id} project={project} claim={claim} />
-								))}
-							</ul>
+
+						{ownedRepos.length > 0 && (
+							<div className='dl-section' style={{ marginTop: '1rem' }}>
+								<div className='dl-section__heading'>
+									Repos · {String(ownedRepos.length).padStart(2, '0')}
+								</div>
+								<ul className='entity-list'>
+									{ownedRepos.map(({ repo, claim }) => (
+										<RepoItem key={repo.id} repo={repo} claim={claim} />
+									))}
+								</ul>
+							</div>
 						)}
 					</div>
 
