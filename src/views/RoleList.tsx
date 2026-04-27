@@ -86,7 +86,7 @@ export function RoleList() {
                 {role.toUpperCase()} · {String(list.length).padStart(2, '0')}
               </span>
 						</div>
-						<ul className='role-group__list'>
+						<ul className='tile-grid--auto'>
 							{list.map(p => (
 								<PersonItem key={p.id} person={p} />
 							))}

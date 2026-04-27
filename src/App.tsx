@@ -12,6 +12,7 @@ import { ImportData } from './views/ImportData';
 import { RepoDetail } from './views/RepoDetail';
 import { ReposList } from './views/ReposList';
 import { SearchResults } from './views/SearchResults';
+import './layout.css';
 import './styles.css';
 
 export function App() {

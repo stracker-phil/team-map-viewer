@@ -20,8 +20,8 @@ interface ContributorsBlockProps {
 function ProjectsBlock({ projects }: { projects: { project: Entity; claim: Claim }[] }) {
 	if (!projects.length) return null;
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>Projects</div>
+		<div className='block'>
+			<div className='block__heading'>Projects</div>
 			<ul className='entity-list'>
 				{projects.map(({ project, claim }) => (
 					<ProjectItem
@@ -35,10 +35,10 @@ function ProjectsBlock({ projects }: { projects: { project: Entity; claim: Claim
 
 function ContributorsBlock({ contributors }: ContributorsBlockProps) {
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>Contributors</div>
+		<div className='block'>
+			<div className='block__heading'>Contributors</div>
 			{contributors.length === 0 ? (
-				<p className='dl-table__empty'>No contributors recorded yet.</p>
+				<p className='block__empty'>No contributors recorded yet.</p>
 			) : (
 				<ul className='entity-list'>
 					{contributors.map(({ person, claim }) => (
@@ -96,14 +96,14 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 
 	if (compact) {
 		return (
-			<div className='repo-popup'>
-				<Link to={`/repo/${repoId}`} className='repo-popup__title'>
-					<GitBranch size={14} className='repo-popup__icon' />
-					<span className='font-mono repo-popup__name'>{repo?.name ?? repoId}</span>
-					{repo?.meta && <span className='repo-popup__meta'>{repo.meta}</span>}
+			<div>
+				<Link to={`/repo/${repoId}`} className='popup__header popup__header--linked'>
+					<GitBranch size={14} className='popup__icon' />
+					<span className='font-mono popup__name popup__name--mono'>{repo?.name ?? repoId}</span>
+					{repo?.meta && <span className='popup__meta'>{repo.meta}</span>}
 				</Link>
-				<div className='repo-popup__body'>
-					<div className='repo-popup__col'>
+				<div className='popup__body'>
+					<div className='popup__col'>
 						<ProjectsBlock projects={projects} />
 						<ContributorsBlock contributors={contributors} />
 					</div>

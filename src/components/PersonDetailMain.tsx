@@ -28,9 +28,9 @@ interface Props {
 function SquadsBlock({ squads }: { squads: { squad: Entity; claim: Claim }[] }) {
 	if (!squads.length) return null;
 	return (
-		<div className='pdm-section pdm-section--squads'>
-			<div className='pdm-section__heading'>Squad</div>
-			<div className='pdm-squads'>
+		<div className='block block--bare'>
+			<div className='block__heading'>Squad</div>
+			<div className='stack stack--tight'>
 				{squads.map(({ squad }) => <SquadCard key={squad.id} squad={squad} />)}
 			</div>
 		</div>
@@ -40,8 +40,8 @@ function SquadsBlock({ squads }: { squads: { squad: Entity; claim: Claim }[] }) 
 function ProjectsBlock({ projects }: { projects: { project: Entity; claim: Claim }[] }) {
 	if (!projects.length) return null;
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>Projects</div>
+		<div className='block'>
+			<div className='block__heading'>Projects</div>
 			<ul className='entity-list'>
 				{projects.map(({ project, claim }) => (
 					<ProjectItem
@@ -59,8 +59,8 @@ function ReposBlock({ repos, heading }: {
 }) {
 	if (!repos.length) return null;
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>{heading}</div>
+		<div className='block'>
+			<div className='block__heading'>{heading}</div>
 			<ul className='entity-list'>
 				{repos.map(({ repo, claim }) => (
 					<RepoItem key={repo.id} repo={repo} claim={claim} detail={claim.detail} />
@@ -87,8 +87,8 @@ function PeopleBlock({
                      }: PeopleBlockProps) {
 	if (!reportTypes.length && !managesTypes.length) return null;
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>People</div>
+		<div className='block'>
+			<div className='block__heading'>People</div>
 			<div className='pdm-people'>
 				{reportTypes.map(type => (
 					<React.Fragment key={`reports-${type}`}>
@@ -242,30 +242,28 @@ export function PersonDetailMain({ personId, compact }: Props) {
 		const person = map.get(personId);
 		const roleTitle = personRoleMap.get(personId);
 		return (
-			<div className='person-popup'>
-				<Link to={`/person/${personId}`} className='person-popup__title'>
+			<div>
+				<Link to={`/person/${personId}`} className='popup__header popup__header--linked'>
 					{person && <Avatar name={person.name} id={person.id} size='sm' />}
-					<span
-						className='font-display person-popup__name'
-					>{person?.name ?? personId}</span>
-					{roleTitle && <span className='person-popup__role'>{roleTitle}</span>}
+					<span className='font-display popup__name'>{person?.name ?? personId}</span>
+					{roleTitle && <span className='popup__meta'>{roleTitle}</span>}
 				</Link>
-				<div className={`person-popup__body${isSplit ? ' person-popup__body--split' : ''}`}>
+				<div className={`popup__body${isSplit ? ' popup__body--split' : ''}`}>
 					{hasLeft && (
-						<div className='person-popup__col'>
+						<div className='popup__col'>
 							<SquadsBlock squads={squads} />
 							<ReposBlock repos={repos} heading='Repos' />
 							<PeopleBlock {...peopleProps} />
 						</div>
 					)}
 					{hasRight && (
-						<div className='person-popup__col'>
+						<div className='popup__col'>
 							<ProjectsBlock projects={projects} />
 						</div>
 					)}
 					{isEmpty && (
-						<div className='person-popup__col'>
-							<p className='dl-table__empty'>No assignments recorded yet.</p>
+						<div className='popup__col'>
+							<p className='block__empty'>No assignments recorded yet.</p>
 						</div>
 					)}
 				</div>
@@ -276,20 +274,20 @@ export function PersonDetailMain({ personId, compact }: Props) {
 	return (
 		<div className='detail-main'>
 			{isEmpty ? (
-				<div className='pdm-section'>
-					<p className='dl-table__empty'>No assignments recorded yet.</p>
+				<div className='block'>
+					<p className='block__empty'>No assignments recorded yet.</p>
 				</div>
 			) : (
-				<div className={isSplit ? 'pdm-cols pdm-cols--split' : 'pdm-cols'}>
+				<div className={isSplit ? 'cols-2' : 'stack'}>
 					{hasLeft && (
-						<div className='pdm-col'>
+						<div className='stack'>
 							<SquadsBlock squads={squads} />
 							<ReposBlock repos={repos} heading='Other Repos' />
 							<PeopleBlock {...peopleProps} />
 						</div>
 					)}
 					{hasRight && (
-						<div className='pdm-col'>
+						<div className='stack'>
 							<ProjectsBlock projects={projects} />
 						</div>
 					)}

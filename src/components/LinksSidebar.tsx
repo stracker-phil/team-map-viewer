@@ -87,7 +87,7 @@ export function LinksSidebar({ claims, entityId, entity }: Props) {
 	];
 
 	return (
-		<aside className='detail-sidebar'>
+		<aside className='detail-aside links-sidebar'>
 			<div className='links-sidebar__heading'>LINKS</div>
 
 			{orderedTypes.length === 0 ? (

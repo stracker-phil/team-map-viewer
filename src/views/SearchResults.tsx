@@ -41,13 +41,13 @@ export function SearchResults() {
 						<p>Try searching by name, role, or project client.</p>
 					</div>
 				) : (
-					<div className='search-page'>
+					<div className='search-results'>
 						{results.map(entity => (
 							<div key={entity.id} className='search-result-row'>
-                <span className='search-result-icon'>
+                <span className='search-result-row__icon'>
                   <TypeIcon entity={entity} />
                 </span>
-								<div className='search-result-info'>
+								<div className='search-result-row__info'>
 									<div className='search-result-name'>
 										<EntityLink entity={entity} />
 									</div>

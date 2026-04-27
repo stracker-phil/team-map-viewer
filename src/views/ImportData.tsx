@@ -79,7 +79,7 @@ export function ImportData({ onClose }: Props = {}) {
 	}
 
 	const panels = (
-		<div className='import-panels'>
+		<div className='panels-2'>
 			<ImportPanel
 				label='entities.csv'
 				value={entitiesCsv}
@@ -101,9 +101,9 @@ export function ImportData({ onClose }: Props = {}) {
 
 	if (onClose) {
 		return (
-			<div className='modal-overlay' onClick={onClose}>
-				<div className='modal-box modal-box--wide' onClick={e => e.stopPropagation()}>
-					<div className='modal-header'>
+			<div className='overlay overlay--center modal-overlay' onClick={onClose}>
+				<div className='overlay__box overlay__box--wide modal-box' onClick={e => e.stopPropagation()}>
+					<div className='modal-shell__header modal-header'>
 						<div>
 							<div className='modal-title-eyebrow'>DATA · IMPORT</div>
 							<h2 className='modal-title'>Paste or upload CSVs</h2>
@@ -112,13 +112,13 @@ export function ImportData({ onClose }: Props = {}) {
 								data inline.
 							</p>
 						</div>
-						<button className='modal-close' onClick={onClose} aria-label='Close'>
+						<button className='modal-shell__close modal-close' onClick={onClose} aria-label='Close'>
 							<X size={20} />
 						</button>
 					</div>
 
 					<form onSubmit={handleImport}>
-						<div className='modal-body'>{panels}</div>
+						<div className='modal-shell__body'>{panels}</div>
 
 						{errors.length > 0 && (
 							<div className='import-error' style={{ margin: '0 2rem 1rem' }}>
@@ -131,7 +131,7 @@ export function ImportData({ onClose }: Props = {}) {
 							>{success}</div>
 						)}
 
-						<div className='modal-footer'>
+						<div className='modal-shell__footer'>
 							<button type='button' className='btn-ghost' onClick={handleReset}>
 								RESET TO SAMPLE DATA
 							</button>
@@ -158,7 +158,7 @@ export function ImportData({ onClose }: Props = {}) {
 			</p>
 
 			<form onSubmit={handleImport}>
-				<div className='import-page__panels'>{panels}</div>
+				<div className='panels-2' style={{ marginBottom: '1.5rem' }}>{panels}</div>
 
 				<div className='import-page__actions'>
 					<button type='submit' className='btn-primary'>Import</button>

@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Boxes } from 'lucide-react';
+import { ArrowLeft, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useStar } from '../context/StarContext.tsx';
 import { filterClaims } from '../utils/derive';
 import { PersonItem } from './PersonItem';
 import { ProjectItem } from './ProjectItem';
 import { Entity, Claim } from '../types';
+import { RepoItem } from './RepoItem.tsx';
+import { StarButton } from './StarButton.tsx';
 
 interface Props {
 	squadId: string;
@@ -13,15 +16,17 @@ interface Props {
 }
 
 export function SquadDetailMain({ squadId, compact }: Props) {
+	const { starred, isStarred } = useStar();
 	const { claims, entityMap: map, teamSize } = useData();
+	const squad = map.get(squadId);
 
 	const memberClaims = useMemo(
-		() => filterClaims(claims, { relation: 'member-of', object: squadId }),
-		[claims, squadId],
+		() => squad ? filterClaims(claims, { relation: 'member-of', object: squad.id }) : [],
+		[claims, squad],
 	);
 	const ownedClaims = useMemo(
-		() => filterClaims(claims, { relation: 'owned-by', object: squadId }),
-		[claims, squadId],
+		() => squad ? filterClaims(claims, { relation: 'owned-by', object: squad.id }) : [],
+		[claims, squad],
 	);
 
 	const membersByRole = useMemo(() => {
@@ -37,66 +42,163 @@ export function SquadDetailMain({ squadId, compact }: Props) {
 			.sort((a, b) => a[0].localeCompare(b[0]))
 			.map(([role, items]) => ({
 				role,
-				items: items.sort((a, b) => a.person.name.localeCompare(b.person.name)),
+				items: items.sort((a, b) =>
+					Number(isStarred(b.person.id)) - Number(isStarred(a.person.id)) ||
+					a.person.name.localeCompare(b.person.name),
+				),
 			}));
-	}, [memberClaims, map]);
+	}, [memberClaims, map, starred]);
 
 	const ownedProjects = useMemo(
 		() => ownedClaims
 			.map(c => ({ project: map.get(c.subject), claim: c }))
-			.filter((x): x is { project: Entity; claim: Claim } =>
-				!!x.project && (teamSize.get(x.project.id) ?? 0) > 0)
-			.sort((a, b) => a.project.name.localeCompare(b.project.name)),
-		[ownedClaims, map, teamSize],
+			.filter((x): x is {
+				project: Entity;
+				claim: Claim
+			} => !!x.project && x.project.type === 'project' && (teamSize.get(x.project.id) ?? 0) > 0)
+			.sort((a, b) =>
+				Number(isStarred(b.project.id)) - Number(isStarred(a.project.id)) ||
+				a.project.name.localeCompare(b.project.name),
+			),
+		[ownedClaims, map, teamSize, starred],
 	);
 
-	const squad = map.get(squadId);
+	const ownedRepos = useMemo(() => {
+		const seen = new Set<string>();
+		const result: { repo: Entity; claim: Claim }[] = [];
 
-	if (!compact) return null;
+		// direct: repo owned-by squad
+		for (const c of ownedClaims) {
+			const repo = map.get(c.subject);
+			if (repo?.type === 'repo' && !seen.has(repo.id)) {
+				seen.add(repo.id);
+				result.push({ repo, claim: c });
+			}
+		}
 
-	return (
-		<div className='squad-popup'>
-			<Link to={`/squad/${squadId}`} className='squad-popup__title'>
-				<span className='squad-popup__icon'><Boxes size={16} /></span>
-				<span className='font-display squad-popup__name'>{squad?.name ?? squadId}</span>
-				{squad?.meta && <span className='squad-popup__meta'>{squad.meta}</span>}
-			</Link>
-			<div className='squad-popup__body'>
-				<div className='squad-popup__col'>
-					{membersByRole.length > 0 && (
-						<div className='pdm-section'>
-							<div className='pdm-section__heading'>
-								People · {String(memberClaims.length).padStart(2, '0')}
-							</div>
-							{membersByRole.map(({ role, items }) => (
-								<div key={role} className='squad-role-group'>
-									<div className='pdm-people__key'>{role}</div>
-									<ul className='entity-list'>
-										{items.map(({ person, claim }) => (
-											<PersonItem key={person.id} person={person} claim={claim} />
-										))}
-									</ul>
+		// indirect: repo belongs-to project owned-by squad
+		const ownedProjectIds = new Set(ownedProjects.map(x => x.project.id));
+		const belongsClaims = filterClaims(claims, { relation: 'belongs-to' });
+		for (const c of belongsClaims) {
+			if (!ownedProjectIds.has(c.object)) continue;
+			const repo = map.get(c.subject);
+			if (repo?.type === 'repo' && !seen.has(repo.id)) {
+				seen.add(repo.id);
+				result.push({ repo, claim: c });
+			}
+		}
+
+		return result.sort((a, b) =>
+			Number(isStarred(b.repo.id)) - Number(isStarred(a.repo.id)) ||
+			a.repo.name.localeCompare(b.repo.name),
+		);
+	}, [ownedClaims, ownedProjects, claims, map, starred]);
+
+	if (compact) {
+		return (
+			<div>
+				<Link to={`/squad/${squadId}`} className='popup__header popup__header--linked'>
+					<span className='popup__icon'><Boxes size={16} /></span>
+					<span className='font-display popup__name'>{squad?.name ?? squadId}</span>
+					{squad?.meta && <span className='popup__meta'>{squad.meta}</span>}
+				</Link>
+				<div className='popup__body'>
+					<div className='popup__col'>
+						{membersByRole.length > 0 && (
+							<div className='block'>
+								<div className='block__heading'>
+									People · {String(memberClaims.length).padStart(2, '0')}
 								</div>
-							))}
-						</div>
-					)}
-					{ownedProjects.length > 0 && (
-						<div className='pdm-section'>
-							<div className='pdm-section__heading'>
-								Projects · {String(ownedProjects.length).padStart(2, '0')}
+								{membersByRole.map(({ role, items }) => (
+									<div key={role} className='squad-role-group'>
+										<div className='pdm-people__key'>{role}</div>
+										<ul className='entity-list'>
+											{items.map(({ person, claim }) => (
+												<PersonItem
+													key={person.id} person={person} claim={claim}
+												/>
+											))}
+										</ul>
+									</div>
+								))}
 							</div>
+						)}
+						{ownedProjects.length > 0 && (
+							<div className='block'>
+								<div className='block__heading'>
+									Projects · {String(ownedProjects.length).padStart(2, '0')}
+								</div>
+								<ul className='entity-list'>
+									{ownedProjects.map(({ project, claim }) => (
+										<ProjectItem
+											key={project.id} project={project} claim={claim}
+										/>
+									))}
+								</ul>
+							</div>
+						)}
+						{membersByRole.length === 0 && ownedProjects.length === 0 && (
+							<p className='block__empty'>No assignments recorded yet.</p>
+						)}
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	return <div className='detail-main'>
+		<div className='cols-2'>
+			<div className='block'>
+				<div className='block__heading'>
+					People · {String(memberClaims.length).padStart(2, '0')}
+				</div>
+				{membersByRole.length === 0 ? (
+					<p className='block__empty'>No members recorded yet.</p>
+				) : (
+					membersByRole.map(({ role, items }) => (
+						<div key={role} className='squad-role-group'>
+							<div className='squad-card__section-label'>{role}</div>
 							<ul className='entity-list'>
-								{ownedProjects.map(({ project, claim }) => (
-									<ProjectItem key={project.id} project={project} claim={claim} />
+								{items.map(({ person, claim }) => (
+									<PersonItem
+										key={person.id} person={person} claim={claim}
+									/>
 								))}
 							</ul>
 						</div>
-					)}
-					{membersByRole.length === 0 && ownedProjects.length === 0 && (
-						<p className='dl-table__empty'>No assignments recorded yet.</p>
+					))
+				)}
+			</div>
+
+			<div className='stack'>
+				<div className='block'>
+					<div className='block__heading'>
+						Projects · {String(ownedProjects.length).padStart(2, '0')}
+					</div>
+					{ownedProjects.length === 0 ? (
+						<p className='block__empty'>No owned projects recorded yet.</p>
+					) : (
+						<ul className='entity-list'>
+							{ownedProjects.map(({ project, claim }) => (
+								<ProjectItem key={project.id} project={project} claim={claim} />
+							))}
+						</ul>
 					)}
 				</div>
+
+				{ownedRepos.length > 0 && (
+					<div className='block'>
+						<div className='block__heading'>
+							Repos · {String(ownedRepos.length).padStart(2, '0')}
+						</div>
+						<ul className='entity-list'>
+							{ownedRepos.map(({ repo, claim }) => (
+								<RepoItem key={repo.id} repo={repo} claim={claim} />
+							))}
+						</ul>
+					</div>
+				)}
 			</div>
 		</div>
-	);
+	</div>;
 }

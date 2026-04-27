@@ -31,15 +31,17 @@ export function ProjectDetail() {
 			</button>
 
 			<div style={{ marginTop: '1.5rem' }}>
-				<div className='entity-header'>
-					<span className='entity-header__icon'><FolderGit2 size={24} /></span>
-					<div style={{ flex: 1 }}>
-						<h1 className='entity-header__title'>{project.name}</h1>
+				<div className='page-header'>
+					<span className='page-header__icon'><FolderGit2 size={24} /></span>
+					<div className='page-header__body'>
+						<h1 className='page-header__title'>{project.name}</h1>
 						{project.meta && (
-							<div className='entity-header__meta'>Client: {project.meta}</div>
+							<div className='page-header__meta'>Client: {project.meta}</div>
 						)}
 					</div>
-					<StarButton entityId={project.id} size='lg' />
+					<div className='page-header__actions'>
+						<StarButton entityId={project.id} size='lg' />
+					</div>
 				</div>
 
 				<div className='detail-layout'>

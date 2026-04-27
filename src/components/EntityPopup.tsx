@@ -89,7 +89,7 @@ export function EntityPopup({ popup, children, as, className, style, disabled, o
 
 	return (
 		<Tag
-			className={`entity-popup-trigger${className ? ` ${className}` : ''}`}
+			className={`popup-trigger${className ? ` ${className}` : ''}`}
 			style={style}
 			onMouseEnter={show}
 			onMouseLeave={scheduleClose}
@@ -101,7 +101,7 @@ export function EntityPopup({ popup, children, as, className, style, disabled, o
 			{open && !disabled && createPortal(
 				<div
 					ref={popupRef}
-					className='entity-popup'
+					className='popup'
 					style={{ top: pos.top, left: pos.left }}
 					onMouseEnter={cancelClose}
 					onMouseLeave={scheduleClose}

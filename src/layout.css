@@ -1,0 +1,448 @@
+/* ============================================================
+   layout.css — Structural layout primitives.
+
+   This file owns ONLY box model, positioning, sizing, spacing,
+   flex/grid composition, and responsive breakpoints. No colors,
+   no fonts, no borders-as-decoration, no transitions. Theme,
+   typography and surface treatments live in styles.css.
+
+   Class names here are intentionally generic and view-agnostic
+   so every page can compose the same primitives.
+   ============================================================ */
+
+/* ── Tokens (layout dimensions only) ── */
+:root {
+	--topbar-height: 48px;
+	--page-max: 1152px;
+	--page-pad-x: 2.5rem;
+	--page-pad-y: 2rem;
+	--detail-aside-width: 30%;
+	--gap-block: 1rem;
+	--gap-section: 1rem;
+	--popup-width: 680px;
+}
+
+/* ── Page container ── */
+
+body {
+	padding-top: var(--topbar-height);
+}
+
+.page {
+	max-width: var(--page-max);
+	margin: 0 auto;
+	padding: var(--page-pad-y) var(--page-pad-x);
+}
+
+/* Body content offset so fixed topbar doesn't overlap. */
+.page-main {
+	margin-top: 2rem;
+}
+
+/* ── Top bar (fixed) ── */
+
+.topbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: var(--topbar-height);
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	padding: 0 var(--page-pad-x);
+}
+
+.topbar__brand {
+	white-space: nowrap;
+	margin-right: 2rem;
+}
+
+.topbar__nav {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	flex: 1;
+}
+
+.topbar__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-left: auto;
+}
+
+.topbar__icon-btn {
+	width: 32px;
+	height: 32px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ── Page header (entity / list title block) ──
+   Layout: [icon] [body{title, meta}] [actions]
+*/
+
+.page-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding-bottom: var(--gap-section);
+}
+
+.page-header__icon {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	margin-top: 0.5rem;
+}
+
+.page-header__body {
+	flex: 1;
+	min-width: 0;
+}
+
+.page-header__title {
+	line-height: 1;
+}
+
+.page-header__meta {
+	margin-top: 0.75rem;
+}
+
+.page-header__actions {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+/* Variant: page header with avatar instead of icon. */
+.page-header__avatar {
+	flex-shrink: 0;
+	margin-top: 0.25rem;
+}
+
+/* ── Section intro (list views: title + optional controls) ── */
+
+.section-intro {
+	margin-bottom: 2rem;
+}
+
+/* ── Detail layout (sidebar + main) ──
+   Default: 1 main column + sticky aside.
+   Modifier --3col: 2 main columns + aside (squad detail).
+*/
+
+.detail-layout {
+	display: grid;
+	grid-template-columns: 1fr var(--detail-aside-width);
+	gap: var(--gap-section);
+	margin-top: var(--gap-section);
+	align-items: flex-start;
+}
+
+.detail-layout--3col {
+	grid-template-columns: 1fr 1fr var(--detail-aside-width);
+}
+
+.detail-main {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap-block);
+}
+
+.detail-aside {
+	position: sticky;
+	top: calc(var(--topbar-height) + var(--gap-section));
+}
+
+/* Block padding + surface = theme concern (see styles.css). */
+
+/* ── Composition helpers ── */
+
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap-block);
+}
+
+.stack--tight {
+	gap: 0.5rem;
+}
+
+.stack--loose {
+	gap: var(--gap-section);
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.row--baseline {
+	align-items: baseline;
+}
+
+.row--between {
+	justify-content: space-between;
+}
+
+.cols-2 {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--gap-block);
+	align-items: start;
+}
+
+.cols-3 {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--gap-block);
+	align-items: start;
+}
+
+/* Auto-fit grid for tile-like lists (squad cards, person cards). */
+.tile-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1.25rem;
+}
+
+.tile-grid--auto {
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 0.5rem 2rem;
+}
+
+/* Plain bullet-less list used for entity-list / link-list / role-group__list. */
+.list-plain {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.list-plain--tight {
+	gap: 0.375rem;
+}
+
+/* ── Popup (EntityPopup) ──
+   Trigger is the relative anchor; popup is portal-positioned absolute
+   inside document.body with coords set via JS. Width + max-height live
+   here so the JS only deals with x/y.
+*/
+
+.popup-trigger {
+	position: relative;
+}
+
+.popup {
+	position: absolute;
+	width: var(--popup-width);
+	max-height: 80vh;
+	overflow-y: auto;
+	z-index: 500;
+}
+
+.popup__header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.625rem 1rem;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.popup__body {
+	display: flex;
+	flex-direction: column;
+}
+
+.popup__body--split {
+	flex-direction: row;
+}
+
+.popup__col {
+	padding: 0.875rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.875rem;
+	flex: 1;
+	min-width: 0;
+}
+
+/* ── Overlay shell (search + modal share this) ── */
+
+.overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	justify-content: center;
+	padding: 1rem;
+}
+
+.overlay--top {
+	align-items: flex-start;
+	padding-top: 15vh;
+	z-index: 200;
+}
+
+.overlay--center {
+	align-items: center;
+}
+
+.overlay__box {
+	width: 100%;
+	max-width: 56rem;
+	max-height: 90vh;
+	overflow-y: auto;
+}
+
+.overlay__box--narrow {
+	max-width: 38rem;
+	margin: 0 1rem;
+}
+
+.overlay__box--wide {
+	max-width: 72rem;
+}
+
+/* ── Modal shell ── */
+
+.modal-shell__header {
+	padding: 1.5rem 2rem;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.modal-shell__body {
+	padding: 1.5rem 2rem;
+}
+
+.modal-shell__footer {
+	padding: 1rem 2rem 1.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.modal-shell__close {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	padding: 0;
+}
+
+/* ── Search overlay ── */
+
+.search-overlay__input-wrap {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.875rem 1rem;
+}
+
+.search-overlay__results {
+	max-height: 380px;
+	overflow-y: auto;
+}
+
+.search-overlay__row {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.625rem 1rem;
+	text-align: left;
+}
+
+/* ── Search results page ── */
+
+.search-results {
+	max-width: 40rem;
+}
+
+.search-result-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem 0;
+}
+
+.search-result-row__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.search-result-row__icon {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+}
+
+/* ── Two-column form/import layout ── */
+
+.panels-2 {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--gap-section);
+}
+
+/* ── Empty state ── */
+
+.empty-state {
+	text-align: center;
+	padding: 6rem 2rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+	:root {
+		--page-pad-x: 1rem;
+		--page-pad-y: 1.5rem;
+	}
+
+	.tile-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.cols-2,
+	.cols-3,
+	.panels-2 {
+		grid-template-columns: 1fr;
+	}
+
+	.detail-layout,
+	.detail-layout--3col {
+		grid-template-columns: 1fr;
+	}
+
+	.detail-aside {
+		position: static;
+		padding-top: 1.25rem;
+	}
+
+	.tile-grid--auto {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media (max-width: 480px) {
+	.tile-grid--auto {
+		grid-template-columns: 1fr;
+	}
+
+	.topbar__actions {
+		gap: 0.25rem;
+	}
+}

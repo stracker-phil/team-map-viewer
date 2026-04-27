@@ -78,13 +78,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<div style={{ paddingTop: '48px' }}>
-			<nav className='app-topbar'>
-				<NavLink to='/' className='app-topbar__brand'>
-					Team Map<span className='app-topbar__dot'>.</span>
+		<div>
+			<nav className='topbar'>
+				<NavLink to='/' className='topbar__brand'>
+					Team Map<span className='topbar__brand-dot'>.</span>
 				</NavLink>
 
-				<div className='app-topbar__nav'>
+				<div className='topbar__nav'>
 					<NavLink
 						to='/' end
 						className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
@@ -119,13 +119,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					</NavLink>
 				</div>
 
-				<div className='app-topbar__actions'>
+				<div className='topbar__actions'>
 					<button className='btn-outline' onClick={() => setShowImport(true)}>
 						<Upload size={13} />
 						IMPORT
 					</button>
 					<button
-						className='app-topbar__search-btn'
+						className='topbar__icon-btn'
 						onClick={() => setShowSearch(true)}
 						aria-label='Search (⌘K)'
 					>
@@ -142,13 +142,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				</div>
 			)}
 
-			<div className='app-container'>
-				<main className='app-main'>{children}</main>
+			<div className='page'>
+				<main className='page-main'>{children}</main>
 			</div>
 
 			{showSearch && (
-				<div className='search-overlay' onClick={() => setShowSearch(false)}>
-					<div className='search-overlay__box' onClick={e => e.stopPropagation()}>
+				<div className='overlay overlay--top search-overlay' onClick={() => setShowSearch(false)}>
+					<div className='overlay__box overlay__box--narrow search-overlay__box' onClick={e => e.stopPropagation()}>
 						<div className='search-overlay__input-wrap'>
               <span style={{ color: 'var(--muted)', display: 'flex', flexShrink: 0 }}>
                 <Search size={16} />
@@ -183,7 +183,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 								{searchResults.map((entity, idx) => (
 									<button
 										key={entity.id}
-										className={`search-dropdown__item${idx === activeIndex ? ' is-active' : ''}`}
+										className={`search-overlay__row${idx === activeIndex ? ' is-active' : ''}`}
 										onMouseDown={() => navigateTo(entity)}
 										onMouseEnter={() => setActiveIndex(idx)}
 									>
@@ -192,13 +192,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 						{entity.type}
                     </span>
 										<div>
-											<div
-												className='search-dropdown__name'
-											>{entity.name}</div>
+											<div className='search-overlay__name'>{entity.name}</div>
 											{entity.meta && (
-												<div
-													className='search-dropdown__meta'
-												>{entity.meta}</div>
+												<div className='search-overlay__meta'>{entity.meta}</div>
 											)}
 										</div>
 									</button>

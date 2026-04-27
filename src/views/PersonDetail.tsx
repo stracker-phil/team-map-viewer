@@ -32,17 +32,21 @@ export function PersonDetail() {
 			</button>
 
 			<div style={{ marginTop: '1.5rem' }}>
-				<div className='entity-header entity-header--person'>
-					<Avatar name={person.name} id={person.id} size='lg' />
-					<div style={{ flex: 1 }}>
-						<h1 className='entity-header__title'>{person.name}</h1>
+				<div className='page-header'>
+					<div className='page-header__avatar'>
+						<Avatar name={person.name} id={person.id} size='lg' />
+					</div>
+					<div className='page-header__body'>
+						<h1 className='page-header__title'>{person.name}</h1>
 						{(roleMap.get(person.id) || person.meta) && (
-							<div className='entity-header__meta'>
+							<div className='page-header__meta'>
 								{roleMap.get(person.id) || person.meta}
 							</div>
 						)}
 					</div>
-					<StarButton entityId={person.id} size='lg' />
+					<div className='page-header__actions'>
+						<StarButton entityId={person.id} size='lg' />
+					</div>
 				</div>
 
 				<div className='detail-layout'>

@@ -35,7 +35,7 @@ export function TeamOverview() {
 					Squads
 				</h1>
 			</div>
-			<div className='squad-grid'>
+			<div className='tile-grid'>
 				{sorted.map(squad => (
 					<SquadCard key={squad.id} squad={squad} />
 				))}

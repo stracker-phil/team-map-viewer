@@ -28,9 +28,9 @@ interface Props {
 
 function OwnerBlock({ owner }: { owner: Entity }) {
 	return (
-		<div className='pdm-section pdm-section--squads'>
-			<div className='pdm-section__heading'>Owner</div>
-			<div className='pdm-squads'>
+		<div className='block block--bare'>
+			<div className='block__heading'>Owner</div>
+			<div className='stack stack--tight'>
 				<SquadCard squad={owner} />
 			</div>
 		</div>
@@ -45,7 +45,7 @@ interface PeopleContentProps {
 
 function PeopleContent({ grouped, entityMap: map, isStarred }: PeopleContentProps) {
 	const hasAny = ROLE_ORDER.some(r => grouped[r]?.length);
-	if (!hasAny) return <p className='dl-table__empty'>No team members recorded yet.</p>;
+	if (!hasAny) return <p className='block__empty'>No team members recorded yet.</p>;
 	return (
 		<dl className='pdm-people'>
 			{ROLE_ORDER.filter(r => grouped[r]?.length).map(r => {
@@ -77,8 +77,8 @@ function PeopleContent({ grouped, entityMap: map, isStarred }: PeopleContentProp
 function ReposBlock({ repos }: { repos: { repo: Entity; claim: Claim }[] }) {
 	if (!repos.length) return null;
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>Repos</div>
+		<div className='block'>
+			<div className='block__heading'>Repos</div>
 			<ul className='entity-list'>
 				{repos.map(({ repo, claim }) => (
 					<RepoItem key={repo.id} repo={repo} claim={claim} detail={claim.detail} />
@@ -90,8 +90,8 @@ function ReposBlock({ repos }: { repos: { repo: Entity; claim: Claim }[] }) {
 
 function PeopleBlock(props: PeopleContentProps) {
 	return (
-		<div className='pdm-section'>
-			<div className='pdm-section__heading'>People</div>
+		<div className='block'>
+			<div className='block__heading'>People</div>
 			<PeopleContent {...props} />
 		</div>
 	);
@@ -151,17 +151,14 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 
 	if (compact) {
 		return (
-			<div className='project-popup'>
-				<Link to={`/project/${projectId}`} className='project-popup__title'>
-					<FolderGit2 size={14} className='project-popup__icon' />
-					<span
-						className='font-display project-popup__name'
-					>{project?.name ?? projectId}</span>
-					{project?.meta &&
-						<span className='project-popup__meta'>Client: {project.meta}</span>}
+			<div>
+				<Link to={`/project/${projectId}`} className='popup__header popup__header--linked'>
+					<FolderGit2 size={14} className='popup__icon' />
+					<span className='font-display popup__name'>{project?.name ?? projectId}</span>
+					{project?.meta && <span className='popup__meta'>Client: {project.meta}</span>}
 				</Link>
-				<div className='project-popup__body'>
-					<div className='project-popup__col'>
+				<div className='popup__body'>
+					<div className='popup__col'>
 						{owningTeam && (
 							<OwnerBlock owner={owningTeam} />
 						)}
@@ -178,15 +175,15 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 			{owningTeam ? (
 				<OwnerBlock owner={owningTeam} />
 			) : (
-				<div className='pdm-section'>
-					<p className='dl-table__empty'>No owner recorded yet.</p>
+				<div className='block'>
+					<p className='block__empty'>No owner recorded yet.</p>
 				</div>
 			)}
 
 			<ReposBlock repos={repos} />
 
-			<div className='pdm-section'>
-				<div className='pdm-section__heading'>People</div>
+			<div className='block'>
+				<div className='block__heading'>People</div>
 				<div className='org-chart-wrap'>
 					<OrgChart
 						claims={worksClaims} entityMap={map} projectName={project?.name ?? ''}
