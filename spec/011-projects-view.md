@@ -1,6 +1,6 @@
 # SPEC-011: Projects view
 
-**Status:** Established (updated 2026-04-26 — table layout replaces card grid)
+**Status:** Established (updated 2026-04-26 — table layout replaces card grid; updated 2026-04-27 — starred projects sort to top)
 
 ## Overview
 
@@ -19,6 +19,7 @@ Clicking an active chip deselects it (returns to ALL). Clicking a different chip
 ## Table
 
 - Only projects with ≥1 `works-on` member are shown. Zero-member projects are hidden everywhere.
+- Starred projects appear at the top of the filtered list (amber `StarIndicator` prefix); then alphabetical within the owner filter.
 - Project entities are deduplicated by id before display to guard against duplicate rows in source CSV.
 - Columns: **Name** (dynamic width) · **Team size** (100 px, fixed) · **Owner** (100 px, fixed).
 - `table-layout: fixed` — name column takes all remaining width.

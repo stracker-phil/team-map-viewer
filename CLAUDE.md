@@ -20,11 +20,12 @@ No test runner, no linter — see [ADR-010](adr/010-no-tests-no-lint.md). `tsc` 
 ```
 src/
   main.tsx                    entry point
-  App.tsx                     router + DataProvider wiring
+  App.tsx                     router + StarProvider + DataProvider wiring
   types.ts                    Entity, Claim, RelationType
   sampleData.ts               inline CSV strings for demo mode
   styles.css                  global CSS (see ADR-008, ADR-012)
   context/DataContext.tsx     global state + derived maps + localStorage sync
+  context/StarContext.tsx     star/bookmark state — Set<string> of starred entity IDs, localStorage key team-map-stars-v1
   utils/
     csv.ts                    parseEntities, parseClaims, exportEntities, exportClaims
     derive.ts                 byType, filterClaims, searchEntities (entityMap/personRoleMap now in DataContext)
@@ -35,6 +36,8 @@ src/
     StaleTag.tsx              small colored dot indicator (amber/red by age)
     Avatar.tsx                deterministic color initials avatar (sm/md/lg sizes)
     EntityPopup.tsx           reusable hover/focus popup wrapper: `as` prop, 1000ms open delay, portal/absolute positioning (no scroll listeners), lazy mount
+    StarButton.tsx            toggle star on detail pages — amber filled icon when starred; calls useStar()
+    StarIndicator.tsx         read-only amber ★ shown in list items when entity is starred; calls useStar()
     OrgChart.tsx              project team hierarchy: TL root → PM/PO middle → dev/QA/design branches; OrgNode uses EntityPopup
     LinksSidebar.tsx          sticky right-column of typed external links per entity; auto-generates GitHub link for org/repo-named repos
     SquadCard.tsx             squad card (name + dynamic stats), used in overview + PersonDetail; wraps EntityPopup; calls useData() internally
@@ -42,9 +45,9 @@ src/
     ProjectDetailMain.tsx     project detail main column; full mode: owner (SquadCard) + repos + org chart + sources; compact: owner + repos + people popup
     RepoDetailMain.tsx        repo detail main column; full mode: projects + contributors list; compact: projects + contributors popup
     SquadDetailMain.tsx       squad detail compact popup: members by role group + owned projects; compact-only (full page stays in SquadDetail.tsx)
-    PersonItem.tsx            canonical person list item: Avatar + EntityLink + optional detail + optional StaleTag; wraps EntityPopup
-    ProjectItem.tsx           canonical project list item: EntityLink + optional detail + StaleTag; wraps EntityPopup
-    RepoItem.tsx              canonical repo list item: EntityLink + optional detail + StaleTag; wraps EntityPopup
+    PersonItem.tsx            canonical person list item: StarIndicator + Avatar + EntityLink + optional detail + optional StaleTag; wraps EntityPopup
+    ProjectItem.tsx           canonical project list item: StarIndicator + EntityLink + optional detail + StaleTag; wraps EntityPopup
+    RepoItem.tsx              canonical repo list item: StarIndicator + EntityLink + optional detail + StaleTag; wraps EntityPopup
   views/
     TeamOverview.tsx          /  — squad grid, each card is a single click-to-navigate card (no tabs)
     RoleList.tsx              /roles  (People view — grouped by role with filter chips)
@@ -60,7 +63,7 @@ data/
   entities.csv                template rows, no real data
   claims.csv                  template rows, no real data
 .github/workflows/deploy.yml  GH Pages deploy on push to main
-adr/                          architectural decisions (ADR-001 – ADR-017)
+adr/                          architectural decisions (ADR-001 – ADR-018)
 spec/                         behavioral specs (SPEC-001 – SPEC-015)
 ```
 
@@ -87,6 +90,7 @@ spec/                         behavioral specs (SPEC-001 – SPEC-015)
 - **EntityPopup:** `<EntityPopup as="..." popup={<Content />}>` wraps any trigger element. 1000ms open delay, 50ms close delay (bridges pointer gap). Popup renders as a `position: absolute` portal at `document.body` — page-absolute coords set once on open, browser scroll naturally keeps it aligned with the trigger (no JS scroll listeners). Above/below decision made once on open. Popup title row is a `<Link>` navigating to the entity's detail page. Popup unmounts on close. Use `disabled` to suppress. Optional `onClick` prop forwarded to trigger element (used by SquadCard button). The popup div calls `e.stopPropagation()` on all clicks — React portals bubble through the React tree, not the DOM tree, so without this, clicks in nested popups leak to ancestor trigger `onClick` handlers. See [ADR-016](adr/016-entity-popup.md).
 - **`*DetailMain` pattern:** `PersonDetailMain`, `ProjectDetailMain`, `RepoDetailMain` each serve double duty: full mode renders `<div className="detail-main">` for the detail page; compact mode renders a `.*-popup` wrapper for use as `EntityPopup` popup content inside `*Item` components. Block components inside each file use `pdm-*` CSS classes — base styles = compact/popup; `.detail-main .pdm-*` overrides = full-page (surface bg, larger padding). `pdm-section--squads` strips the wrapper card for SquadCards (which have their own card styling). People groups are always stacked (role sublabel → list), not a grid. See [ADR-017](adr/017-detail-main-pattern.md).
 - **PersonDetailMain full mode layout:** 2-col split (`pdm-cols--split`) when both sides have content: left col = squads + other repos + people; right col = projects. Mirrors the compact popup column order. See [ADR-017](adr/017-detail-main-pattern.md).
+- **Star/bookmark system:** `StarContext` (`useStar()`) holds a `Set<string>` of starred entity IDs, persisted to `localStorage['team-map-stars-v1']`. `StarButton` (detail pages only) toggles star. `StarIndicator` (read-only amber ★) renders in `PersonItem`, `ProjectItem`, `RepoItem`, `SquadCard` before the entity name. All list views and detail-page sub-lists sort starred entities first — include `starred` (the Set) in each relevant `useMemo` dep array so re-sorting is reactive. See [ADR-018](adr/018-star-bookmarks.md).
 - **Behavioral specs:** `spec/` documents established UI behaviors. Update the relevant spec whenever behavior changes. See [ADR-013](adr/013-behavioral-specs.md).
 - **Demo mode:** If `localStorage['team-map-v1']` is missing, sample data loads into memory only (`isDemo: true`). Any user import replaces it permanently. See [ADR-011](adr/011-sample-data-demo-mode.md).
 - **Import modal:** `<ImportData onClose={fn} />` renders as a modal overlay; `<ImportData />` (no prop) renders as a full page. `Layout` manages `showImport` state and renders the modal. When real data is loaded (`isDemo: false`), text areas initialize with the current CSV so users can review or copy what's active. Text areas are empty in demo mode.

@@ -1,6 +1,6 @@
 # SPEC-006: Squad overview
 
-**Status:** Established (updated April 2026 — simplified cards, tabs removed; updated 2026-04-27 — hover popup added, dynamic stats)
+**Status:** Established (updated April 2026 — simplified cards, tabs removed; updated 2026-04-27 — hover popup added, dynamic stats; updated 2026-04-27 — star sort + indicator)
 
 ## Overview
 
@@ -8,7 +8,7 @@ The home page (`#/`) shows all squads as cards in a 2-column grid.
 
 ## Grid layout
 
-- All squads are shown in a 2-column grid with 20 px gap, sorted in the order they appear in `entities.csv`.
+- All squads are shown in a 2-column grid with 20 px gap. Starred squads appear first; within each starred/unstarred group, order follows `entities.csv`.
 - On screens narrower than 768 px the grid collapses to a single column.
 
 ## Squad card
@@ -17,7 +17,7 @@ Each card is a clickable button that navigates to `#/squad/:id` on click. Hoveri
 
 The card shows:
 - Squad `meta` as a small uppercase monospace label above the name (only if `meta` is non-empty).
-- Squad name in Fraunces serif.
+- Squad name in Fraunces serif, prefixed with an amber `StarIndicator` when the squad is starred.
 - A stats line: `{N} People · {M} Projects` in uppercase monospace. People = count of `member-of` claims; Projects = count of `owned-by` projects with ≥1 `works-on` member. Stats items are dynamic — items with 0 count are omitted.
 
 There are no tabs, no expanded member or project lists inline. The squad detail page is the place for the full roster.

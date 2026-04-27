@@ -1,6 +1,6 @@
 # SPEC-010: People view
 
-**Status:** Established (updated 2026-04-26 — person rows now use PersonItem with EntityPopup)
+**Status:** Established (updated 2026-04-26 — person rows now use PersonItem with EntityPopup; updated 2026-04-27 — starred people sort to top of each role group)
 
 ## Overview
 
@@ -17,7 +17,7 @@ The People view (`#/roles`) shows the full roster grouped by job title, with fil
 ## Grouped list
 
 - People are grouped by `meta` (job title). Groups are sorted alphabetically by title.
-- Within each group, people appear in the order returned by the filter (insertion order from `entities`).
+- Within each group, starred people appear first (amber `StarIndicator` prefix); then alphabetical by name.
 - Each group shows a heading with the role name and a "ROLE · count" badge.
 - Each person row uses `<PersonItem>` (avatar · name link) rendered inside `<ul className="entity-list">`. No staleness indicator — no per-person claim is in scope on this view.
 - Hovering any person row shows an `EntityPopup` with that person's detail main column (see ADR-016, SPEC-009).
