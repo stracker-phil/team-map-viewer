@@ -1,4 +1,5 @@
 import { Entity, Claim } from '../types';
+import { useData } from '../context/DataContext';
 import { EntityLink } from './EntityLink';
 import { StaleTag } from './StaleTag';
 import { Avatar } from './Avatar';
@@ -14,11 +15,15 @@ interface Props {
 }
 
 export function PersonItem({ person, claim = null, detail = null, style }: Props) {
+	const { personRoleMap } = useData();
+	const role = personRoleMap.get(person.id) ?? person.meta;
 	return (
 		<EntityPopup
 			as='li'
 			className='entity-item'
 			style={style}
+			entity={person}
+			meta={role}
 			popup={<PersonDetailMain personId={person.id} compact />}
 		>
 			<Avatar name={person.name} id={person.id} size='sm' />

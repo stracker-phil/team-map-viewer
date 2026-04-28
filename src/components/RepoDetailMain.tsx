@@ -1,6 +1,4 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { GitBranch } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
@@ -96,17 +94,10 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 
 	if (compact) {
 		return (
-			<div>
-				<Link to={`/repo/${repoId}`} className='popup__header popup__header--linked'>
-					<GitBranch size={14} className='popup__icon' />
-					<span className='font-mono popup__name popup__name--mono'>{repo?.name ?? repoId}</span>
-					{repo?.meta && <span className='popup__meta'>{repo.meta}</span>}
-				</Link>
-				<div className='popup__body'>
-					<div className='popup__col'>
-						<ProjectsBlock projects={projects} />
-						<ContributorsBlock contributors={contributors} />
-					</div>
+			<div className='popup__body'>
+				<div className='popup__col'>
+					<ProjectsBlock projects={projects} />
+					<ContributorsBlock contributors={contributors} />
 				</div>
 			</div>
 		);

@@ -41,6 +41,8 @@ export function SquadCard({ squad }: Props) {
 			as='button'
 			className='squad-card'
 			onClick={() => navigate(`/squad/${squad.id}`)}
+			entity={squad}
+			meta={squad.meta}
 			popup={<SquadDetailMain squadId={squad.id} compact />}
 		>
 			<div className='squad-card__header'>

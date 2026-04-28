@@ -213,8 +213,10 @@ body {
 }
 
 .tile-grid--auto {
+	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 	gap: 0.5rem 2rem;
+	list-style: none;
 }
 
 /* Plain bullet-less list used for entity-list / link-list / role-group__list. */

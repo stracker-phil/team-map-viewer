@@ -1,14 +1,11 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { useStar } from '../context/StarContext.tsx';
+import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
 import { PersonItem } from './PersonItem';
 import { ProjectItem } from './ProjectItem';
+import { RepoItem } from './RepoItem';
 import { Entity, Claim } from '../types';
-import { RepoItem } from './RepoItem.tsx';
-import { StarButton } from './StarButton.tsx';
 
 interface Props {
 	squadId: string;
@@ -96,51 +93,44 @@ export function SquadDetailMain({ squadId, compact }: Props) {
 
 	if (compact) {
 		return (
-			<div>
-				<Link to={`/squad/${squadId}`} className='popup__header popup__header--linked'>
-					<span className='popup__icon'><Boxes size={16} /></span>
-					<span className='font-display popup__name'>{squad?.name ?? squadId}</span>
-					{squad?.meta && <span className='popup__meta'>{squad.meta}</span>}
-				</Link>
-				<div className='popup__body'>
-					<div className='popup__col'>
-						{membersByRole.length > 0 && (
-							<div className='block'>
-								<div className='block__heading'>
-									People · {String(memberClaims.length).padStart(2, '0')}
+			<div className='popup__body'>
+				<div className='popup__col'>
+					{membersByRole.length > 0 && (
+						<div className='block'>
+							<div className='block__heading'>
+								People · {String(memberClaims.length).padStart(2, '0')}
+							</div>
+							{membersByRole.map(({ role, items }) => (
+								<div key={role} className='squad-role-group'>
+									<div className='pdm-people__key'>{role}</div>
+									<ul className='entity-list'>
+										{items.map(({ person, claim }) => (
+											<PersonItem
+												key={person.id} person={person} claim={claim}
+											/>
+										))}
+									</ul>
 								</div>
-								{membersByRole.map(({ role, items }) => (
-									<div key={role} className='squad-role-group'>
-										<div className='pdm-people__key'>{role}</div>
-										<ul className='entity-list'>
-											{items.map(({ person, claim }) => (
-												<PersonItem
-													key={person.id} person={person} claim={claim}
-												/>
-											))}
-										</ul>
-									</div>
+							))}
+						</div>
+					)}
+					{ownedProjects.length > 0 && (
+						<div className='block'>
+							<div className='block__heading'>
+								Projects · {String(ownedProjects.length).padStart(2, '0')}
+							</div>
+							<ul className='entity-list'>
+								{ownedProjects.map(({ project, claim }) => (
+									<ProjectItem
+										key={project.id} project={project} claim={claim}
+									/>
 								))}
-							</div>
-						)}
-						{ownedProjects.length > 0 && (
-							<div className='block'>
-								<div className='block__heading'>
-									Projects · {String(ownedProjects.length).padStart(2, '0')}
-								</div>
-								<ul className='entity-list'>
-									{ownedProjects.map(({ project, claim }) => (
-										<ProjectItem
-											key={project.id} project={project} claim={claim}
-										/>
-									))}
-								</ul>
-							</div>
-						)}
-						{membersByRole.length === 0 && ownedProjects.length === 0 && (
-							<p className='block__empty'>No assignments recorded yet.</p>
-						)}
-					</div>
+							</ul>
+						</div>
+					)}
+					{membersByRole.length === 0 && ownedProjects.length === 0 && (
+						<p className='block__empty'>No assignments recorded yet.</p>
+					)}
 				</div>
 			</div>
 		);

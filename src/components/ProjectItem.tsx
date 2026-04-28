@@ -20,6 +20,8 @@ export function ProjectItem({ project, claim = null, detail = null, style, disab
 			className='entity-item'
 			style={style}
 			disabled={disablePopup}
+			entity={project}
+			meta={project.meta ? `Client: ${project.meta}` : null}
 			popup={<ProjectDetailMain projectId={project.id} compact />}
 		>
 			<StarIndicator entityId={project.id} />

@@ -20,6 +20,8 @@ export function RepoItem({ repo, claim = null, detail = null, style, disablePopu
 			className='entity-item'
 			style={style}
 			disabled={disablePopup}
+			entity={repo}
+			meta={repo.meta}
 			popup={<RepoDetailMain repoId={repo.id} compact />}
 		>
 			<StarIndicator entityId={repo.id} />

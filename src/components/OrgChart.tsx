@@ -5,6 +5,7 @@ import { Avatar } from './Avatar';
 import { StaleTag } from './StaleTag';
 import { EntityPopup } from './EntityPopup';
 import { PersonDetailMain } from './PersonDetailMain';
+import { useData } from '../context/DataContext';
 
 const ROLE_LABELS: Record<string, string> = {
 	TL: 'Team Lead',
@@ -33,11 +34,15 @@ function OrgNode({
 	claim: Claim;
 	size: 'sm' | 'md';
 }) {
+	const { personRoleMap } = useData();
+	const role = personRoleMap.get(person.id) ?? person.meta;
 	return (
 		<EntityPopup
 			as='div'
 			className={`org-node org-node--${size}`}
-			popup={<PersonDetailMain personId={person.id} />}
+			entity={person}
+			meta={role}
+			popup={<PersonDetailMain personId={person.id} compact />}
 		>
 			<Avatar name={person.name} id={person.id} size={size} />
 			<div className='org-node__info'>

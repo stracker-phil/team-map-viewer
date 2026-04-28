@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
@@ -7,7 +6,6 @@ import { SquadCard } from './SquadCard';
 import { PersonItem } from './PersonItem';
 import { ProjectItem } from './ProjectItem';
 import { RepoItem } from './RepoItem';
-import { Avatar } from './Avatar';
 import { Entity, Claim } from '../types';
 
 const REPORT_TYPE_LABELS: Record<string, string> = {
@@ -121,7 +119,7 @@ function PeopleBlock({
 }
 
 export function PersonDetailMain({ personId, compact }: Props) {
-	const { claims, entityMap: map, personRoleMap } = useData();
+	const { claims, entityMap: map } = useData();
 	const { starred, isStarred } = useStar();
 
 	const reportsClaims = useMemo(
@@ -239,34 +237,25 @@ export function PersonDetailMain({ personId, compact }: Props) {
 	};
 
 	if (compact) {
-		const person = map.get(personId);
-		const roleTitle = personRoleMap.get(personId);
 		return (
-			<div>
-				<Link to={`/person/${personId}`} className='popup__header popup__header--linked'>
-					{person && <Avatar name={person.name} id={person.id} size='sm' />}
-					<span className='font-display popup__name'>{person?.name ?? personId}</span>
-					{roleTitle && <span className='popup__meta'>{roleTitle}</span>}
-				</Link>
-				<div className={`popup__body${isSplit ? ' popup__body--split' : ''}`}>
-					{hasLeft && (
-						<div className='popup__col'>
-							<SquadsBlock squads={squads} />
-							<ReposBlock repos={repos} heading='Repos' />
-							<PeopleBlock {...peopleProps} />
-						</div>
-					)}
-					{hasRight && (
-						<div className='popup__col'>
-							<ProjectsBlock projects={projects} />
-						</div>
-					)}
-					{isEmpty && (
-						<div className='popup__col'>
-							<p className='block__empty'>No assignments recorded yet.</p>
-						</div>
-					)}
-				</div>
+			<div className={`popup__body${isSplit ? ' popup__body--split' : ''}`}>
+				{hasLeft && (
+					<div className='popup__col'>
+						<SquadsBlock squads={squads} />
+						<ReposBlock repos={repos} heading='Repos' />
+						<PeopleBlock {...peopleProps} />
+					</div>
+				)}
+				{hasRight && (
+					<div className='popup__col'>
+						<ProjectsBlock projects={projects} />
+					</div>
+				)}
+				{isEmpty && (
+					<div className='popup__col'>
+						<p className='block__empty'>No assignments recorded yet.</p>
+					</div>
+				)}
 			</div>
 		);
 	}

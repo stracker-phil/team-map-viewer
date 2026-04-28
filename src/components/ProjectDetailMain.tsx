@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { FolderGit2, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
@@ -151,22 +150,15 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 
 	if (compact) {
 		return (
-			<div>
-				<Link to={`/project/${projectId}`} className='popup__header popup__header--linked'>
-					<FolderGit2 size={14} className='popup__icon' />
-					<span className='font-display popup__name'>{project?.name ?? projectId}</span>
-					{project?.meta && <span className='popup__meta'>Client: {project.meta}</span>}
-				</Link>
-				<div className='popup__body popup__body--split'>
-					<div className='popup__col'>
-						{owningTeam && (
-							<OwnerBlock owner={owningTeam} />
-						)}
-						<ReposBlock repos={repos} />
-					</div>
-					<div className='popup__col'>
-						<PeopleBlock {...peopleProps} />
-					</div>
+			<div className='popup__body popup__body--split'>
+				<div className='popup__col'>
+					{owningTeam && (
+						<OwnerBlock owner={owningTeam} />
+					)}
+					<ReposBlock repos={repos} />
+				</div>
+				<div className='popup__col'>
+					<PeopleBlock {...peopleProps} />
 				</div>
 			</div>
 		);
