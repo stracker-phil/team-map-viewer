@@ -1,0 +1,15 @@
+# src/context
+
+## Data flow
+
+JSON → `parseTeamJson` (utils/csv.ts) → `DataContext` → `useData()` hook → views. See [ADR-007](../../adr/007-react-context-state.md) and [ADR-019](../../adr/019-json-data-format.md).
+
+## DataContext
+
+Computes derived maps once (memoized): `entityMap`, `people`, `squads`, `projects`, `repos`, `teamSize`, `squadOf`, `personRoleMap`, `contributorCount`. Views destructure from `useData()` — no per-view re-derivation. `filterClaims` from `utils/derive.ts` is still used for per-entity queries in detail views.
+
+`isDemo: true` when no `localStorage['team-map-v1']` — sample data loads into memory only. Any user import replaces it permanently. See [ADR-011](../../adr/011-sample-data-demo-mode.md).
+
+## StarContext
+
+`useStar()` holds `Set<string>` of starred entity IDs, persisted to `localStorage['team-map-stars-v1']`. All list views and detail-page sub-lists sort starred entities first — include `starred` in each relevant `useMemo` dep array so re-sorting is reactive. See [ADR-018](../../adr/018-star-bookmarks.md).
