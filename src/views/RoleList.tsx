@@ -7,7 +7,7 @@ import { PersonItem } from '../components/PersonItem';
 import { Entity } from '../types';
 
 export function RoleList() {
-	const { people } = useData();
+	const { people, config } = useData();
 	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
@@ -57,6 +57,9 @@ export function RoleList() {
 					<Users size={26} />
 					People
 				</h1>
+				{config?.pages?.people?.description && (
+					<p className='section-intro__description'>{config.pages.people.description}</p>
+				)}
 			</div>
 
 			<div className='role-filters'>

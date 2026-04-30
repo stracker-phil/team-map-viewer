@@ -9,8 +9,8 @@ interface Props {
 }
 
 export function ImportData({ onClose }: Props = {}) {
-  const { entities, claims, setData, clearData, isDemo } = useData();
-  const [json, setJson] = useState(() => isDemo ? '' : exportTeamJson(entities, claims));
+  const { entities, claims, config, setData, clearData, isDemo } = useData();
+  const [json, setJson] = useState(() => isDemo ? '' : exportTeamJson(entities, claims, config));
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -28,14 +28,14 @@ export function ImportData({ onClose }: Props = {}) {
     setErrors([]);
     setSuccess('');
 
-    const { entities: newEntities, claims: newClaims, errors: parseErrors } = parseTeamJson(json);
+    const { entities: newEntities, claims: newClaims, config: newConfig, errors: parseErrors } = parseTeamJson(json);
 
     if (newEntities.length === 0 && newClaims.length === 0) {
       setErrors(['Nothing to import — paste or upload a team.json file.']);
       return;
     }
 
-    setData(newEntities, newClaims);
+    setData(newEntities, newClaims, newConfig);
     setSuccess(
       `Imported ${newEntities.length} entities and ${newClaims.length} claims.` +
       (parseErrors.length ? ` ${parseErrors.length} rows skipped.` : ''),
@@ -51,8 +51,8 @@ export function ImportData({ onClose }: Props = {}) {
   }
 
   function handleReset() {
-    const { entities: newEntities, claims: newClaims } = parseTeamJson(SAMPLE_TEAM_JSON);
-    setData(newEntities, newClaims);
+    const { entities: newEntities, claims: newClaims, config: newConfig } = parseTeamJson(SAMPLE_TEAM_JSON);
+    setData(newEntities, newClaims, newConfig);
     setJson(SAMPLE_TEAM_JSON);
     if (onClose) onClose();
   }

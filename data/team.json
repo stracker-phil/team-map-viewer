@@ -1,4 +1,27 @@
 {
+  "config": {
+    "brand": { "name": "Acme Corp" },
+    "pages": {
+      "squads": { "description": "" },
+      "people": { "description": "" },
+      "projects": { "description": "" },
+      "repos": { "description": "" }
+    },
+    "theme": {
+      "colors": {
+        "bg": "#f4f8fa",
+        "surface": "#E1E3E2",
+        "sidebarBg": "#FFDBCC",
+        "accent": "#1F4842",
+        "text": "#1C1B18",
+        "muted": "#78716c"
+      }
+    },
+    "footer": {
+      "text": "Created by Jane Smith",
+      "builtAt": "2026-04-30"
+    }
+  },
   "entities": [
     { "id": "alice", "name": "Alice Müller", "type": "person", "meta": "Engineering Manager" },
     { "id": "bob", "name": "Bob Tanaka", "type": "person", "meta": "Senior Engineer" },

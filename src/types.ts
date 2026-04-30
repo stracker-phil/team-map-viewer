@@ -26,7 +26,34 @@ export interface Claim {
 	verified: string;
 }
 
+export interface AppConfig {
+	brand?: {
+		name?: string;
+	};
+	pages?: {
+		squads?: { description?: string };
+		people?: { description?: string };
+		projects?: { description?: string };
+		repos?: { description?: string };
+	};
+	theme?: {
+		colors?: {
+			bg?: string;
+			surface?: string;
+			sidebarBg?: string;
+			accent?: string;
+			text?: string;
+			muted?: string;
+		};
+	};
+	footer?: {
+		text?: string;
+		builtAt?: string;
+	};
+}
+
 export interface AppData {
+	config?: AppConfig;
 	entities: Entity[];
 	claims: Claim[];
 }

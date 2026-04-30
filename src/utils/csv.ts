@@ -1,4 +1,4 @@
-import { Entity, Claim, EntityType, RelationType } from '../types';
+import { Entity, Claim, AppConfig, EntityType, RelationType } from '../types';
 
 const VALID_RELATIONS = new Set<string>([
   'works-on', 'owned-by', 'member-of', 'reports-to',
@@ -7,9 +7,9 @@ const VALID_RELATIONS = new Set<string>([
 
 const stripRepo = (s: string) => s.startsWith('repo/') ? s.slice(5) : s;
 
-export function parseTeamJson(json: string): { entities: Entity[]; claims: Claim[]; errors: string[] } {
+export function parseTeamJson(json: string): { entities: Entity[]; claims: Claim[]; config?: AppConfig; errors: string[] } {
   const errors: string[] = [];
-  let parsed: { entities?: unknown[]; claims?: unknown[] };
+  let parsed: { entities?: unknown[]; claims?: unknown[]; config?: AppConfig };
 
   try {
     parsed = JSON.parse(json) as typeof parsed;
@@ -56,9 +56,12 @@ export function parseTeamJson(json: string): { entities: Entity[]; claims: Claim
     });
   }
 
-  return { entities, claims, errors };
+  const config = (parsed as { config?: AppConfig }).config;
+
+  return { entities, claims, config, errors };
 }
 
-export function exportTeamJson(entities: Entity[], claims: Claim[]): string {
-  return JSON.stringify({ entities, claims }, null, 2);
+export function exportTeamJson(entities: Entity[], claims: Claim[], config?: AppConfig): string {
+  const obj: Record<string, unknown> = config ? { config, entities, claims } : { entities, claims };
+  return JSON.stringify(obj, null, 2);
 }

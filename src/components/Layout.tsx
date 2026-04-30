@@ -14,7 +14,7 @@ function TypeIcon({ type }: { type: Entity['type'] }) {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-	const { entities, isDemo, people, projects, squads, repos } = useData();
+	const { entities, isDemo, people, projects, squads, repos, config } = useData();
 	const [search, setSearch] = useState('');
 	const [activeIndex, setActiveIndex] = useState(-1);
 	const [showSearch, setShowSearch] = useState(false);
@@ -81,7 +81,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 		<div>
 			<nav className='topbar'>
 				<NavLink to='/' className='topbar__brand'>
-					Team Map<span className='topbar__brand-dot'>.</span>
+					{config?.brand?.name ?? 'Team Map'}<span className='topbar__brand-dot'>.</span>
 				</NavLink>
 
 				<div className='topbar__nav'>
@@ -144,6 +144,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 			<div className='page'>
 				<main className='page-main'>{children}</main>
+				{(config?.footer?.text || config?.footer?.builtAt) && (
+					<footer className='page-footer'>
+						{config.footer!.text && <span>{config.footer!.text}</span>}
+						{config.footer!.builtAt && <span>Data as of {config.footer!.builtAt}</span>}
+					</footer>
+				)}
 			</div>
 
 			{showSearch && (

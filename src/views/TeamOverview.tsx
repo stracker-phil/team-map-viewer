@@ -6,7 +6,7 @@ import { useStar } from '../context/StarContext';
 import { SquadCard } from '../components/SquadCard';
 
 export function TeamOverview() {
-	const { squads } = useData();
+	const { squads, config } = useData();
 	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
@@ -34,6 +34,9 @@ export function TeamOverview() {
 					<Boxes size={26} />
 					Squads
 				</h1>
+				{config?.pages?.squads?.description && (
+					<p className='section-intro__description'>{config.pages.squads.description}</p>
+				)}
 			</div>
 			<div className='tile-grid'>
 				{sorted.map(squad => (

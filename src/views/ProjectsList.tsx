@@ -6,7 +6,7 @@ import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 
 export function ProjectsList() {
-	const { projects, teamSize, squadOf, entityMap } = useData();
+	const { projects, teamSize, squadOf, entityMap, config } = useData();
 	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
@@ -65,6 +65,9 @@ export function ProjectsList() {
 					<FolderGit2 size={26} />
 					Projects
 				</h1>
+				{config?.pages?.projects?.description && (
+					<p className='section-intro__description'>{config.pages.projects.description}</p>
+				)}
 			</div>
 
 			{allOwners.length > 0 && (

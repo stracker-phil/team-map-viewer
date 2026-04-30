@@ -6,7 +6,7 @@ import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 
 export function ReposList() {
-	const { repos, contributorCount } = useData();
+	const { repos, contributorCount, config } = useData();
 	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
@@ -34,6 +34,9 @@ export function ReposList() {
 					<GitBranch size={26} />
 					Repos
 				</h1>
+				{config?.pages?.repos?.description && (
+					<p className='section-intro__description'>{config.pages.repos.description}</p>
+				)}
 			</div>
 
 			<table className='entity-table'>
