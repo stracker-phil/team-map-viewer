@@ -4,7 +4,7 @@
 
 ## Overview
 
-All org information is stored in two flat CSV files. Entities hold identity; claims hold every relationship and fact.
+All org information is stored in a single `team.json` file with top-level `entities` and `claims` arrays. Entities hold identity; claims hold every relationship and fact.
 
 ## Entities
 
@@ -16,7 +16,7 @@ Each entity has four fields: `id`, `name`, `type`, `meta`.
   - project → client name
   - squad → squad kind (e.g. "support"), if any
   - repo → short description of the repository's purpose
-- Entity IDs are stable slugs used as foreign keys in claims. An entity referenced by a claim but absent from `entities.csv` is silently dropped in all views — no error is shown.
+- Entity IDs are stable slugs used as foreign keys in claims. An entity referenced by a claim but absent from the entities array is silently dropped in all views — no error is shown.
 
 ## Claims
 
@@ -47,7 +47,7 @@ Each claim row has six fields: `subject`, `relation`, `object`, `detail`, `sourc
 
 ## Import: `repo/` prefix stripping
 
-The CSV parser silently strips a `repo/` prefix from entity IDs (in `entities.csv`) and from `subject`/`object` fields (in `claims.csv`) at import time. This is an internal convention in some source data that namespaces repo IDs to avoid collisions — the prefix never enters the app's data context or URLs.
+`parseTeamJson` silently strips a `repo/` prefix from entity IDs and from `subject`/`object` fields in claims at import time. This is an internal convention in some source data that namespaces repo IDs to avoid collisions — the prefix never enters the app's data context or URLs.
 
 ## Referential integrity
 

@@ -1,16 +1,9 @@
-import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Boxes, ArrowLeft } from 'lucide-react';
 import { SquadDetailMain } from '../components/SquadDetailMain.tsx';
 import { useData } from '../context/DataContext';
-import { useStar } from '../context/StarContext';
-import { filterClaims } from '../utils/derive';
 import { LinksSidebar } from '../components/LinksSidebar';
-import { PersonItem } from '../components/PersonItem';
-import { ProjectItem } from '../components/ProjectItem';
-import { RepoItem } from '../components/RepoItem';
 import { StarButton } from '../components/StarButton';
-import { Entity, Claim } from '../types';
 
 export function SquadDetail() {
 	const { id } = useParams<{ id: string }>();

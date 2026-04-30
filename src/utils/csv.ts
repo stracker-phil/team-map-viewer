@@ -1,70 +1,64 @@
-import Papa from 'papaparse';
 import { Entity, Claim, EntityType, RelationType } from '../types';
 
-const VALID_RELATIONS = new Set<string>(['works-on', 'owned-by', 'member-of', 'reports-to', 'role', 'contributes-to', 'link', 'belongs-to']);
+const VALID_RELATIONS = new Set<string>([
+  'works-on', 'owned-by', 'member-of', 'reports-to',
+  'role', 'contributes-to', 'link', 'belongs-to',
+]);
 
-export function parseEntities(csv: string): { data: Entity[]; errors: string[] } {
-	const result = Papa.parse<Record<string, string>>(csv.trim(), {
-		header: true,
-		skipEmptyLines: true,
-	});
+const stripRepo = (s: string) => s.startsWith('repo/') ? s.slice(5) : s;
 
-	const errors: string[] = [];
-	const data: Entity[] = [];
+export function parseTeamJson(json: string): { entities: Entity[]; claims: Claim[]; errors: string[] } {
+  const errors: string[] = [];
+  let parsed: { entities?: unknown[]; claims?: unknown[] };
 
-	for (const row of result.data) {
-		if (!row.id || !row.name || !row.type) {
-			errors.push(`Row missing required field (id/name/type): ${JSON.stringify(row)}`);
-			continue;
-		}
-		const rawId = row.id.trim();
-		data.push({
-			id: rawId.startsWith('repo/') ? rawId.slice(5) : rawId,
-			name: row.name.trim(),
-			type: row.type.trim() as EntityType,
-			meta: (row.meta ?? '').trim(),
-		});
-	}
+  try {
+    parsed = JSON.parse(json) as typeof parsed;
+  } catch (e) {
+    return { entities: [], claims: [], errors: [`Invalid JSON: ${String(e)}`] };
+  }
 
-	return { data, errors };
+  if (typeof parsed !== 'object' || parsed === null) {
+    return { entities: [], claims: [], errors: ['JSON must be an object with "entities" and "claims" arrays'] };
+  }
+
+  const entities: Entity[] = [];
+  for (const row of ((parsed.entities ?? []) as Record<string, string>[])) {
+    if (!row.id || !row.name || !row.type) {
+      errors.push(`Entity missing required field (id/name/type): ${JSON.stringify(row)}`);
+      continue;
+    }
+    const rawId = row.id.trim();
+    entities.push({
+      id: rawId.startsWith('repo/') ? rawId.slice(5) : rawId,
+      name: row.name.trim(),
+      type: row.type.trim() as EntityType,
+      meta: (row.meta ?? '').trim(),
+    });
+  }
+
+  const claims: Claim[] = [];
+  for (const row of ((parsed.claims ?? []) as Record<string, string>[])) {
+    if (!row.subject || !row.relation || !row.object) {
+      errors.push(`Claim missing required field (subject/relation/object): ${JSON.stringify(row)}`);
+      continue;
+    }
+    if (!VALID_RELATIONS.has(row.relation)) {
+      errors.push(`Invalid relation "${row.relation}" — expected works-on, owned-by, member-of, reports-to, role, contributes-to, link, or belongs-to`);
+      continue;
+    }
+    claims.push({
+      subject: stripRepo(row.subject.trim()),
+      relation: row.relation.trim() as RelationType,
+      object: stripRepo(row.object.trim()),
+      detail: (row.detail ?? '').trim(),
+      source: (row.source ?? '').trim(),
+      verified: (row.verified ?? '').trim(),
+    });
+  }
+
+  return { entities, claims, errors };
 }
 
-export function parseClaims(csv: string): { data: Claim[]; errors: string[] } {
-	const result = Papa.parse<Record<string, string>>(csv.trim(), {
-		header: true,
-		skipEmptyLines: true,
-	});
-
-	const errors: string[] = [];
-	const data: Claim[] = [];
-
-	for (const row of result.data) {
-		if (!row.subject || !row.relation || !row.object) {
-			errors.push(`Row missing required field (subject/relation/object): ${JSON.stringify(row)}`);
-			continue;
-		}
-		if (!VALID_RELATIONS.has(row.relation)) {
-			errors.push(`Invalid relation "${row.relation}" — expected works-on, owned-by, member-of, reports-to, role, contributes-to, link, or belongs-to`);
-			continue;
-		}
-		const stripRepo = (s: string) => s.startsWith('repo/') ? s.slice(5) : s;
-		data.push({
-			subject: stripRepo(row.subject.trim()),
-			relation: row.relation.trim() as RelationType,
-			object: stripRepo(row.object.trim()),
-			detail: (row.detail ?? '').trim(),
-			source: (row.source ?? '').trim(),
-			verified: (row.verified ?? '').trim(),
-		});
-	}
-
-	return { data, errors };
-}
-
-export function exportEntities(entities: Entity[]): string {
-	return Papa.unparse(entities);
-}
-
-export function exportClaims(claims: Claim[]): string {
-	return Papa.unparse(claims);
+export function exportTeamJson(entities: Entity[], claims: Claim[]): string {
+  return JSON.stringify({ entities, claims }, null, 2);
 }

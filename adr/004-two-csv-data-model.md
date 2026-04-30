@@ -22,9 +22,11 @@ Split data into `entities.csv` (id, name, type, meta) and `claims.csv` (subject,
 
 **Convention (2026-04-27b):** The CSV parser silently strips a `repo/` prefix from entity IDs and from `subject`/`object` fields in claims at import time. This guards against ID collisions between repo and project entities in source data that uses the prefix as a namespace — the prefix never enters the app's data context or URLs.
 
+**Amendment (2026-04-30):** Data format changed from two CSV files (`entities.csv` + `claims.csv`) to a single `team.json` file with top-level `entities` and `claims` arrays. The logical data model (entities + claims, same fields) is unchanged. `parseEntities`/`parseClaims`/`exportEntities`/`exportClaims` (PapaParse-based) replaced by `parseTeamJson`/`exportTeamJson` (native JSON). `SAMPLE_ENTITIES_CSV` + `SAMPLE_CLAIMS_CSV` in `sampleData.ts` replaced by `SAMPLE_TEAM_JSON`. Import UI reduced to one full-width textarea accepting a single JSON paste or file upload. See ADR-019.
+
 ## Consequences
 
 - Staleness is per-fact, not per-entity — a stale project assignment doesn't flag the whole person.
 - Multi-team membership, multiple project roles: just add more claim rows. No schema change.
-- Two files to keep in sync — claims referencing missing entity IDs are silently dropped in views (graceful but hides errors).
-- Git diffs on `claims.csv` serve as the changelog.
+- Single file to maintain — easier to pass around, copy, and version.
+- Git diffs on `team.json` serve as the changelog.

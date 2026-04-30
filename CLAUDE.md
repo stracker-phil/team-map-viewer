@@ -1,6 +1,6 @@
 # team-map-viewer
 
-Interactive viewer for company team structure. Renders two CSV files (entities + claims) as interlinked views so engineers can answer "who works on X?" without escalating to a manager. Static SPA, no backend, data lives in the user's browser.
+Interactive viewer for company team structure. Renders a single `team.json` file (entities + claims) as interlinked views so engineers can answer "who works on X?" without escalating to a manager. Static SPA, no backend, data lives in the user's browser.
 
 See [PLAN.md](PLAN.md) for the full product spec.
 
@@ -22,13 +22,13 @@ src/
   main.tsx                    entry point
   App.tsx                     router + StarProvider + DataProvider wiring
   types.ts                    Entity, Claim, RelationType
-  sampleData.ts               inline CSV strings for demo mode
+  sampleData.ts               inline SAMPLE_TEAM_JSON string for demo mode
   layout.css                  structural layout primitives (page/topbar/page-header/detail-layout/block/popup/overlay/grids); no colors or fonts
   styles.css                  global theme CSS — colors, typography, surface treatments (see ADR-008, ADR-012)
   context/DataContext.tsx     global state + derived maps + localStorage sync
   context/StarContext.tsx     star/bookmark state — Set<string> of starred entity IDs, localStorage key team-map-stars-v1
   utils/
-    csv.ts                    parseEntities, parseClaims, exportEntities, exportClaims
+    csv.ts                    parseTeamJson, exportTeamJson
     derive.ts                 byType, filterClaims, searchEntities (entityMap/personRoleMap now in DataContext)
     stale.ts                  staleDays, staleLevel, staleLabel
   components/
@@ -61,8 +61,7 @@ src/
     ImportData.tsx            /import (also renders as modal overlay when onClose prop is provided)
     SearchResults.tsx         /search?q=...
 data/
-  entities.csv                template rows, no real data
-  claims.csv                  template rows, no real data
+  team.json                   template data, no real data
 .github/workflows/deploy.yml  GH Pages deploy on push to main
 adr/                          architectural decisions (ADR-001 – ADR-018)
 spec/                         behavioral specs (SPEC-001 – SPEC-015)
@@ -70,16 +69,16 @@ spec/                         behavioral specs (SPEC-001 – SPEC-015)
 
 ## Key patterns
 
-- **Data flow:** CSV → `parseEntities`/`parseClaims` → `DataContext` → `useData()` hook → views. See [ADR-007](adr/007-react-context-state.md).
+- **Data flow:** JSON → `parseTeamJson` → `DataContext` → `useData()` hook → views. See [ADR-007](adr/007-react-context-state.md) and [ADR-019](adr/019-json-data-format.md).
 - **Derived context:** `DataContext` computes derived maps once (memoized): `entityMap`, `people`, `squads`, `projects`, `repos`, `teamSize`, `squadOf`, `personRoleMap`, `contributorCount`. Views destructure from `useData()` — no per-view re-derivation. `filterClaims` from `utils/derive.ts` is still used for per-entity queries in detail views. See [ADR-007](adr/007-react-context-state.md).
 - **Routing:** HashRouter for static hosting. All routes under `#/…`. See [ADR-003](adr/003-hash-router.md).
-- **Data model:** Entities hold no structure. All relationships (team membership, project work, reporting, ownership, specific role title, repo contributions, repo-to-project membership, external links) are rows in `claims.csv` with per-fact `verified` dates. Entity types: `person`, `project`, `squad`, `repo`. See [ADR-004](adr/004-two-csv-data-model.md).
+- **Data model:** Entities hold no structure. All relationships (team membership, project work, reporting, ownership, specific role title, repo contributions, repo-to-project membership, external links) are claim objects in `team.json` with per-fact `verified` dates. Entity types: `person`, `project`, `squad`, `repo`. See [ADR-004](adr/004-two-csv-data-model.md).
 - **Link claims:** External links use `relation: link`. `subject` = entity id, `object` = full URL, `detail` = display label, `source` = link type (jira/slack/confluence/github/website/wporg/personio/…). `LinksSidebar` reads claims filtered by `relation === 'link'` and groups by `source`.
 - **Repo naming:** Repo entity names use `org/repo` format (e.g. `acme/api-server`). `LinksSidebar` auto-generates a GitHub link for repos whose name matches this pattern — no explicit `link` claim needed. See [ADR-004](adr/004-two-csv-data-model.md).
 - **Role vs meta:** `entity.meta` for a person is the *general category* (e.g. "Developer") — used for grouping in RoleList, SquadDetail role groups, and OrgChart. A `role` claim (`subject: personId, relation: role, object: "Senior Frontend Developer"`) is the *specific display title* — shown in PersonDetail subtitle and inline in squad card person lists. `personRoleMap` is available directly from `useData()`.
 - **works-on vs contributes-to:** `works-on` targets `project` entities; `contributes-to` targets `repo` entities. On PersonDetail these appear in separate cards — "Projects" and "Other Repos". `works-on` claims pointing to `repo` entities are silently rerouted to Other Repos. `teamSize` (from context) only counts `works-on` claims where the target is a `project` entity. See [SPEC-009](spec/009-person-detail.md).
 - **belongs-to:** `belongs-to` claims connect a repo (`subject`) to a project (`object`). ProjectDetail shows a "Repos" section (after owner) listing all repos that belong to the project. RepoDetail shows a "Projects" section (above contributors) listing all projects the repo belongs to. Both sections hidden when no `belongs-to` claims exist. See [ADR-004](adr/004-two-csv-data-model.md).
-- **repo/ prefix:** The CSV parser silently strips a `repo/` prefix from entity IDs and from `subject`/`object` in claims at import time. The prefix never enters the app's data context or URLs. See [SPEC-012](spec/012-import-export.md).
+- **repo/ prefix:** `parseTeamJson` silently strips a `repo/` prefix from entity IDs and from `subject`/`object` in claims at import time. The prefix never enters the app's data context or URLs. See [SPEC-012](spec/012-import-export.md).
 - **0-member projects hidden:** Projects with no `works-on` members are filtered out in ProjectsList, SquadCard stats, and SquadDetail projects column. Use `teamSize` from `useData()`.
 - **Entity item components:** All person/project/repo list items use `<PersonItem>`, `<ProjectItem>`, `<RepoItem>` rendered in `<ul className="entity-list">`. Never hand-roll list items for entity content. `PersonItem.claim` is optional — omit when no per-row claim is in scope. All three wrap `EntityPopup` — nested popups are supported, do not pass `disablePopup`. See [ADR-015](adr/015-entity-item-components.md).
 - **Staleness:** `StaleTag` reads a claim's `verified` date and renders a small colored dot (teal ≤30d, amber 30-60d, orange 60-90d, red >90d). Passed to entity item components via the `claim` prop. See [SPEC-002](spec/002-staleness.md).
@@ -94,8 +93,8 @@ spec/                         behavioral specs (SPEC-001 – SPEC-015)
 - **Star/bookmark system:** `StarContext` (`useStar()`) holds a `Set<string>` of starred entity IDs, persisted to `localStorage['team-map-stars-v1']`. `StarButton` (detail pages only) toggles star. `StarIndicator` (read-only amber ★) renders in `PersonItem`, `ProjectItem`, `RepoItem`, `SquadCard` before the entity name. All list views and detail-page sub-lists sort starred entities first — include `starred` (the Set) in each relevant `useMemo` dep array so re-sorting is reactive. See [ADR-018](adr/018-star-bookmarks.md).
 - **Behavioral specs:** `spec/` documents established UI behaviors. Update the relevant spec whenever behavior changes. See [ADR-013](adr/013-behavioral-specs.md).
 - **Demo mode:** If `localStorage['team-map-v1']` is missing, sample data loads into memory only (`isDemo: true`). Any user import replaces it permanently. See [ADR-011](adr/011-sample-data-demo-mode.md).
-- **Import modal:** `<ImportData onClose={fn} />` renders as a modal overlay; `<ImportData />` (no prop) renders as a full page. `Layout` manages `showImport` state and renders the modal. When real data is loaded (`isDemo: false`), text areas initialize with the current CSV so users can review or copy what's active. Text areas are empty in demo mode.
-- **No export:** The app is a read-only viewer. There is no export button or `downloadCsv` helper. The serialize functions (`exportEntities`/`exportClaims`) exist solely to populate the import text areas. See [ADR-014](adr/014-static-read-only-viewer.md).
+- **Import modal:** `<ImportData onClose={fn} />` renders as a modal overlay; `<ImportData />` (no prop) renders as a full page. `Layout` manages `showImport` state and renders the modal. When real data is loaded (`isDemo: false`), the textarea initializes with the current JSON so users can review or copy what's active. Textarea is empty in demo mode.
+- **No export:** The app is a read-only viewer. There is no export button. `exportTeamJson` exists solely to populate the import textarea with current data for review or copy. See [ADR-014](adr/014-static-read-only-viewer.md).
 - **Design system:** `--bg: #fafafa`, `--surface: #E1E3E2` (cards), `--sidebar-bg: #FFDBCC` (links sidebar), teal accent `#1F4842`. Fraunces/Geist/JetBrains Mono fonts. Cards use background color for depth — no decorative borders. Fixed 48px topbar; CMD+K (`⌘K`/`Ctrl+K`) opens search overlay. See [ADR-012](adr/012-editorial-design-system.md).
 - **Type badges:** Entity type has distinct color chip (`.type-badge.type-badge--{type}`). CSS vars `--type-{person,squad,project,repo}-{bg,text}` defined on `:root` for easy retheming. Currently used in CMD+K results.
 - **Detail page sections:** Use the unified `.block` class (card background `var(--surface)`, `.block__heading`, `.block__empty`). `.popup .block` strips the surface in compact/popup mode. `.block--bare` strips card style explicitly. Sidebar uses `background: var(--sidebar-bg)` via `.links-sidebar`; sticky offset comes from `.detail-aside` in `layout.css`.

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Entity, Claim, AppData } from '../types';
-import { parseEntities, parseClaims } from '../utils/csv';
-import { SAMPLE_ENTITIES_CSV, SAMPLE_CLAIMS_CSV } from '../sampleData';
+import { parseTeamJson } from '../utils/csv';
+import { SAMPLE_TEAM_JSON } from '../sampleData';
 
 const STORAGE_KEY = 'team-map-v1';
 
@@ -27,10 +27,8 @@ interface DataContextValue {
 const DataContext = createContext<DataContextValue | null>(null);
 
 function loadSampleData(): { entities: Entity[]; claims: Claim[] } {
-	return {
-		entities: parseEntities(SAMPLE_ENTITIES_CSV).data,
-		claims: parseClaims(SAMPLE_CLAIMS_CSV).data,
-	};
+	const { entities, claims } = parseTeamJson(SAMPLE_TEAM_JSON);
+	return { entities, claims };
 }
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
