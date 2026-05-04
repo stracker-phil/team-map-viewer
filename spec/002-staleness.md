@@ -1,33 +1,23 @@
 # SPEC-002: Staleness indicator
 
-**Status:** Established
+**Status:** Removed
 
 ## Overview
 
-Every claim carries a `verified` date. A colored dot next to a claim's subject communicates how recently that fact was confirmed.
+Previously, a colored dot next to a claim's subject communicated how recently that fact was confirmed, computed from the `verified` date on each claim.
 
-## Thresholds
+## Why removed
 
-Age is computed as calendar days between `verified` and today.
+The `verified` date is identical across all claims (set at import time from the source file), making the staleness signal meaningless — every dot would show the same age. The feature was removed entirely.
 
-| Age           | Level   | Dot color              |
-|---------------|---------|------------------------|
-| < 30 days     | fresh   | muted teal (30% opacity) |
-| 30 – 59 days  | warn    | amber (`#d97706`)      |
-| 60 – 89 days  | old     | orange (`#ea580c`)     |
-| ≥ 90 days     | stale   | red (`#dc2626`)        |
-| empty/invalid | fresh   | muted teal             |
+## What was removed
 
-A missing or unparseable `verified` date is treated as fresh (no penalty).
+- `StaleTag` component (`src/components/StaleTag.tsx`)
+- `utils/stale.ts` (`staleDays`, `staleLevel`, `staleLabel`)
+- `StaleLevel` type in `types.ts`
+- `.stale-dot` CSS block in `styles.css`
+- StaleTag render sites in `PersonItem`, `ProjectItem`, `RepoItem`, `OrgChart`
 
-## Placement
+## Data model
 
-The `StaleTag` dot appears:
-- Next to each person in the squad overview card People tab (member-of claim)
-- Next to each person's name in squad detail people column (member-of claim)
-- Next to each project in squad detail projects column (owned-by claim)
-- Next to managers and direct reports in person detail (reports-to claim)
-- Next to each squad and project in person detail (member-of, works-on claims)
-- In the org chart nodes on project detail (works-on claims)
-
-The dot is always the first visual element inside a `.claim-item`, or rendered inline after the entity name.
+The `verified` field remains on the `Claim` type and is still parsed from `team.json` — it is part of the data schema but no longer displayed.

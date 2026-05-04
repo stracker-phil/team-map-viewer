@@ -1,6 +1,5 @@
 import { Entity, Claim } from '../types';
 import { EntityLink } from './EntityLink';
-import { StaleTag } from './StaleTag';
 import { EntityPopup } from './EntityPopup';
 import { RepoDetailMain } from './RepoDetailMain';
 import { StarIndicator } from './StarIndicator';
@@ -27,7 +26,6 @@ export function RepoItem({ repo, claim = null, detail = null, style, disablePopu
 			<StarIndicator entityId={repo.id} />
 			<EntityLink entity={repo} />
 			{detail && <span className='claim-item__detail'>{detail}</span>}
-			{claim && <StaleTag verified={claim.verified} />}
 		</EntityPopup>
 	);
 }

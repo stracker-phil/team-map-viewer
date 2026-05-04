@@ -1,6 +1,5 @@
 import { Entity, Claim } from '../types';
 import { EntityLink } from './EntityLink';
-import { StaleTag } from './StaleTag';
 import { EntityPopup } from './EntityPopup';
 import { ProjectDetailMain } from './ProjectDetailMain';
 import { StarIndicator } from './StarIndicator';
@@ -27,7 +26,6 @@ export function ProjectItem({ project, claim = null, detail = null, style, disab
 			<StarIndicator entityId={project.id} />
 			<EntityLink entity={project} />
 			{detail && <span className='claim-item__detail'>{detail}</span>}
-			{claim && <StaleTag verified={claim.verified} />}
 		</EntityPopup>
 	);
 }

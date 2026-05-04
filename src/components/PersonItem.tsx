@@ -1,7 +1,6 @@
 import { Entity, Claim } from '../types';
 import { useData } from '../context/DataContext';
 import { EntityLink } from './EntityLink';
-import { StaleTag } from './StaleTag';
 import { Avatar } from './Avatar';
 import { EntityPopup } from './EntityPopup';
 import { PersonDetailMain } from './PersonDetailMain';
@@ -30,7 +29,6 @@ export function PersonItem({ person, claim = null, detail = null, style }: Props
 			<StarIndicator entityId={person.id} />
 			<EntityLink entity={person} />
 			{detail && <span className='claim-item__detail'>{detail}</span>}
-			{claim && <StaleTag verified={claim.verified} />}
 		</EntityPopup>
 	);
 }

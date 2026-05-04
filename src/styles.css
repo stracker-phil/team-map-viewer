@@ -408,32 +408,6 @@ body {
 }
 
 
-/* ── Stale indicator ── */
-
-.stale-dot {
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	flex-shrink: 0;
-	display: inline-block;
-}
-
-.stale-dot--fresh {
-	background: var(--accent-underline);
-}
-
-.stale-dot--warn {
-	background: #d97706;
-}
-
-.stale-dot--old {
-	background: #ea580c;
-}
-
-.stale-dot--stale {
-	background: #dc2626;
-}
-
 /* ── Demo banner ── */
 
 .demo-banner {

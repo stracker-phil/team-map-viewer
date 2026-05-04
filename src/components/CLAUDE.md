@@ -29,10 +29,6 @@ Wraps `EntityPopup as="button"` — click navigates to squad detail, hover (1000
 `StarButton` (detail pages): toggles star, amber filled when starred; calls `useStar()`.  
 `StarIndicator` (list items): read-only amber ★ in PersonItem, ProjectItem, RepoItem, SquadCard; calls `useStar()`. See [ADR-018](../../adr/018-star-bookmarks.md).
 
-## StaleTag
-
-Small colored dot. Passed via `claim` prop on entity item components. Thresholds in `utils/stale.ts`. See [SPEC-002](../../spec/002-staleness.md).
-
 ## Detail page sections
 
 `.block` class: card background `var(--surface)`, `.block__heading`, `.block__empty`. `.popup .block` strips surface. `.block--bare` strips explicitly. `LinksSidebar` uses `background: var(--sidebar-bg)` via `.links-sidebar`; sticky offset from `.detail-aside` in `layout.css`.

@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Entity, Claim } from '../types';
 import { EntityLink } from './EntityLink';
 import { Avatar } from './Avatar';
-import { StaleTag } from './StaleTag';
 import { EntityPopup } from './EntityPopup';
 import { PersonDetailMain } from './PersonDetailMain';
 import { useData } from '../context/DataContext';
@@ -49,7 +48,6 @@ function OrgNode({
 				<EntityLink entity={person} />
 				{person.meta && <span className='org-node__title'>{person.meta}</span>}
 			</div>
-			<StaleTag verified={claim.verified} />
 		</EntityPopup>
 	);
 }

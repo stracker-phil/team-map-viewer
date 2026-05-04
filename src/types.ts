@@ -8,8 +8,6 @@ export type RelationType =
 	| 'contributes-to'
 	| 'link'
 	| 'belongs-to';
-export type StaleLevel = 'fresh' | 'warn' | 'old' | 'stale';
-
 export interface Entity {
 	id: string;
 	name: string;
