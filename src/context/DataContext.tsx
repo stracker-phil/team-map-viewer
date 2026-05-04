@@ -64,6 +64,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 			accent: '--accent',
 			text: '--text',
 			muted: '--muted',
+			link: '--link',
+			accentFg: '--accent-fg',
 		};
 		const colors = config?.theme?.colors ?? {};
 		for (const [key, cssVar] of Object.entries(cssVarMap)) {

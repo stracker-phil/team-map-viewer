@@ -44,6 +44,8 @@ export interface AppConfig {
 			accent?: string;
 			text?: string;
 			muted?: string;
+			link?: string;     // link text color on surfaces (default: accent)
+			accentFg?: string; // text on accent-colored backgrounds (default: bg)
 		};
 	};
 	footer?: {

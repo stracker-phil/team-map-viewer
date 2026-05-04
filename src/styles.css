@@ -22,6 +22,13 @@
 	--popup-border: #78716c;
 	--popup-overlay: #ffffff60;
 
+	/* Derived from --accent — update automatically when accent changes */
+	--accent-subtle: color-mix(in srgb, var(--accent) 8%, transparent);
+	--accent-subtle-border: color-mix(in srgb, var(--accent) 16%, transparent);
+	--accent-underline: color-mix(in srgb, var(--accent) 30%, transparent);
+	/* Derived from --text */
+	--surface-hover: color-mix(in srgb, var(--text) 5%, transparent);
+
 	/* Entity type colors */
 	--type-person-bg: #DBEAFE;
 	--type-person-text: #1e40af;
@@ -257,7 +264,7 @@ body {
 
 .search-overlay__row:hover,
 .search-overlay__row.is-active {
-	background: rgba(28, 27, 24, 0.05);
+	background: var(--surface-hover);
 }
 
 .search-overlay__name {
@@ -317,6 +324,7 @@ body {
 .btn-primary:hover {
 	background: var(--accent);
 	border-color: var(--accent);
+	color: var(--accent-fg, var(--bg));
 }
 
 .btn-ghost {
@@ -359,11 +367,11 @@ body {
 /* ── Entity links ── */
 
 .entity-link {
-	color: var(--accent);
+	color: var(--link, var(--accent));
 	text-decoration: underline;
 	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
-	text-decoration-color: rgba(31, 72, 66, 0.3);
+	text-decoration-color: var(--accent-underline);
 	cursor: pointer;
 	background: none;
 	border: none;
@@ -391,10 +399,10 @@ body {
 	&:hover {
 		text-decoration: underline;
 		text-decoration-thickness: 2px;
-		text-decoration-color: var(--accent);
+		text-decoration-color: var(--link, var(--accent));
 
 		&:before {
-			background: rgba(31, 72, 66, 0.06);
+			background: var(--accent-subtle);
 		}
 	}
 }
@@ -411,7 +419,7 @@ body {
 }
 
 .stale-dot--fresh {
-	background: rgba(31, 72, 66, 0.3);
+	background: var(--accent-underline);
 }
 
 .stale-dot--warn {
@@ -429,8 +437,8 @@ body {
 /* ── Demo banner ── */
 
 .demo-banner {
-	background: rgba(31, 72, 66, 0.07);
-	border-bottom: 1px solid rgba(31, 72, 66, 0.15);
+	background: var(--accent-subtle);
+	border-bottom: 1px solid var(--accent-subtle-border);
 	color: var(--accent);
 	font-family: 'JetBrains Mono', monospace;
 	font-size: 11px;
@@ -1116,16 +1124,16 @@ body {
 }
 
 .link-item a {
-	color: var(--accent);
+	color: var(--link, var(--accent));
 	text-decoration: underline;
 	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
-	text-decoration-color: rgba(31, 72, 66, 0.3);
+	text-decoration-color: var(--accent-underline);
 	transition: text-decoration-color 0.2s;
 }
 
 .link-item a:hover {
-	text-decoration-color: var(--accent);
+	text-decoration-color: var(--link, var(--accent));
 }
 
 /* ── Org chart ── */
@@ -1384,8 +1392,8 @@ body {
 
 .import-success {
 	padding: 0.75rem;
-	background: rgba(31, 72, 66, 0.07);
-	border: 1px solid rgba(31, 72, 66, 0.2);
+	background: var(--accent-subtle);
+	border: 1px solid var(--accent-subtle-border);
 	border-radius: 3px;
 	font-family: 'JetBrains Mono', monospace;
 	font-size: 11px;
