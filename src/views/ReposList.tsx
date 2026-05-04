@@ -59,7 +59,7 @@ export function ReposList() {
 	}
 
 	return (
-		<div>
+		<div className='list type-repo'>
 			<div className='section-intro'>
 				<h1 className='section-intro__title'>
 					<GitBranch size={26} />
@@ -75,8 +75,8 @@ export function ReposList() {
 				items={phpChips}
 				active={phpFilter}
 				onChange={setPhpFilter}
-				allLabel='ALL PHP'
-				allCount={phpVersionMap.size}
+				allLabel='ALL'
+				allCount={repos.length}
 			/>
 
 			<table className='entity-table'>

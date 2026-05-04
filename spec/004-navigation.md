@@ -1,6 +1,6 @@
 # SPEC-004: Navigation and routing
 
-**Status:** Established (updated April 2026 — fixed topbar, CMD+K search)
+**Status:** Established (updated April 2026 — fixed topbar, CMD+K search; updated 2026-05-04 — ⌘1–⌘4 nav shortcuts)
 
 ## Overview
 
@@ -28,7 +28,7 @@ A 48 px fixed navigation bar (`position: fixed; top: 0`) spans the full viewport
 The bar contains (left to right):
 
 1. **Brand wordmark** — "Team Map." in Fraunces, links to `#/`.
-2. **Nav links** — Squads · People · Projects · Repos, each with a zero-padded entity count. Active link highlighted in teal.
+2. **Nav links** — Squads · People · Projects · Repos, each with a `<KbdChip>` (⌘1–⌘4) and a zero-padded entity count. Active link highlighted in teal. Pressing `⌘1`/`Ctrl+1` through `⌘4`/`Ctrl+4` navigates to the corresponding section.
 3. **Import button** — opens the import modal overlay.
 4. **Search icon button** — opens the CMD+K search overlay.
 

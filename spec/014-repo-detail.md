@@ -1,6 +1,6 @@
 # SPEC-014: Repo detail
 
-**Status:** Established (updated 2026-05-04 — Dependencies section added; updated 2026-05-04 — Used by counter)
+**Status:** Established (updated 2026-05-04 — Dependencies section added; updated 2026-05-04 — Used by counter; updated 2026-05-04 — ⌘F in-page filter added)
 
 ## Overview
 
@@ -40,6 +40,17 @@ Two-column: main content left, `LinksSidebar` right (30%). The `entity` prop is 
 ## USED BY section
 
 If any other repos declare a `uses` claim pointing to this repo, a "Used by" section appears listing those repos as `<RepoItem>`. The section heading shows a count (`block__heading-count`). Hidden when no usages exist. Populated from `repoUsagesMap` in `DataContext`.
+
+## In-page text filter
+
+A `<ListSearch>` field appears between the page header and the detail layout. `⌘F`/`Ctrl+F` focuses it (browser find suppressed). Typing filters all sections by name (case-insensitive substring):
+
+- **Dependencies** — matched by repo entity name or label string.
+- **Projects** — matched by project name.
+- **Used by** — matched by repo name.
+- **Contributors** — matched by person name.
+
+Filter is not applied in compact/popup mode.
 
 ## Not found
 

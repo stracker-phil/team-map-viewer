@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Boxes, ArrowLeft } from 'lucide-react';
 import { SquadDetailMain } from '../components/SquadDetailMain.tsx';
 import { useData } from '../context/DataContext';
 import { LinksSidebar } from '../components/LinksSidebar';
+import { ListSearch } from '../components/ListSearch';
 import { StarButton } from '../components/StarButton';
 
 export function SquadDetail() {
 	const { id } = useParams<{ id: string }>();
 	const { claims, entityMap: map, teamSize } = useData();
 	const navigate = useNavigate();
+	const [filterQuery, setFilterQuery] = useState('');
 	const squad = id ? map.get(id) : undefined;
 
 	if (!squad || squad.type !== 'squad') {
@@ -23,7 +26,7 @@ export function SquadDetail() {
 	}
 
 	return (
-		<div>
+		<div className='entity type-squad'>
 			<button className='back-link' onClick={() => navigate(-1)}>
 				<ArrowLeft size={13} />
 				BACK
@@ -43,8 +46,9 @@ export function SquadDetail() {
 					</div>
 				</div>
 
+				<ListSearch value={filterQuery} onChange={setFilterQuery} />
 				<div className='detail-layout'>
-					<SquadDetailMain squadId={squad.id} />
+					<SquadDetailMain squadId={squad.id} filterQuery={filterQuery} />
 					<LinksSidebar claims={claims} entityId={squad.id} />
 				</div>
 			</div>

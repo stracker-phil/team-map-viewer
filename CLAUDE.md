@@ -28,7 +28,7 @@ src/
   views/                  route views — see src/views/CLAUDE.md
 data/team.json            template data, no real data
 data/CLAUDE.md            team.json schema reference (config, entities, claims)
-adr/                      architectural decisions (ADR-001 – ADR-020)
+adr/                      architectural decisions (ADR-001 – ADR-021)
 spec/                     behavioral specs (SPEC-001 – SPEC-015)
 ```
 
@@ -45,7 +45,7 @@ spec/                     behavioral specs (SPEC-001 – SPEC-015)
 
 ## Design system
 
-`--bg: #fafafa`, `--surface: #E1E3E2` (cards), `--sidebar-bg: #FFDBCC` (links sidebar), teal accent `#1F4842`. Fraunces/Geist/JetBrains Mono fonts. Cards use background color for depth — no decorative borders. Fixed 48px topbar; CMD+K (`⌘K`/`Ctrl+K`) opens search overlay. See [ADR-012](adr/012-editorial-design-system.md).
+`--bg: #fafafa`, `--surface: #E1E3E2` (cards), `--sidebar-bg: #FFDBCC` (links sidebar), teal accent `#1F4842`. Fraunces/Geist/JetBrains Mono fonts. Cards use background color for depth — no decorative borders. Fixed 48px topbar; CMD+K (`⌘K`/`Ctrl+K`) opens search overlay; `⌘F`/`Ctrl+F` on list pages and detail pages focuses the text filter (browser find suppressed). Keyboard shortcuts rendered inline via `<KbdChip>` — see [ADR-021](adr/021-kbd-chip-shortcut-pattern.md). See [ADR-012](adr/012-editorial-design-system.md) for design system.
 
 CSS vars (`--bg`, `--surface`, `--sidebar-bg`, `--accent`, `--text`, `--muted`, `--link`, `--accent-fg`) can be overridden at runtime via `config.theme.colors` in `team.json` — set on `:root` by `DataProvider`. Absent keys fall back to stylesheet defaults via `removeProperty`. `--link` defaults to `--accent`; set it darker when accent is a light/neon color. `--accent-fg` defaults to `--bg`; set it when accent is too light for white text. Four additional alpha-tinted vars (`--accent-subtle`, `--accent-subtle-border`, `--accent-underline`, `--surface-hover`) are auto-derived via CSS `color-mix()` — no JSON key needed. See [data/CLAUDE.md](data/CLAUDE.md) for the full schema and [ADR-020](adr/020-config-block.md) for implementation details.
 
@@ -59,7 +59,7 @@ Deploy: `vite.config.ts` `base: '/team-map-viewer/'` must match GitHub repo name
 - **Function components only**, hooks for state.
 - **2-space indent**, single quotes, semicolons, trailing commas.
 - **File naming:** PascalCase for components/views (`TeamOverview.tsx`), camelCase for utils (`derive.ts`).
-- **Class names:** BEM-ish — `.squad-card__header`, `.claim-item__detail`. Utility classes: `.font-display`, `.font-mono`.
+- **Class names:** BEM-ish — `.squad-card__header`, `.claim-item__detail`. Utility classes: `.font-display`, `.font-mono`. View root classes: `list type-{person|squad|project|repo}` on list views, `entity type-{type}` on detail views — used for CSS scoping (e.g. `.list .list-toolbar`, `.entity .list-toolbar`).
 - **No data in the repo.** Real org data imported through UI only. No real company names, emails, or identifiers in commits, sample data, or comments.
 - **Rules of Hooks:** All `useMemo`/`useState`/`useCallback` before any conditional early return.
 - **Behavioral specs:** Update relevant `spec/` file whenever behavior changes. See [ADR-013](adr/013-behavioral-specs.md).

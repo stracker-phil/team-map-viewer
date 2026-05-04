@@ -60,7 +60,7 @@ export function RoleList() {
 	}
 
 	return (
-		<div>
+		<div className='list type-person'>
 			<div className='section-intro'>
 				<h1 className='section-intro__title'>
 					<Users size={26} />

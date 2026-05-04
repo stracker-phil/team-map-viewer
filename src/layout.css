@@ -80,6 +80,14 @@ body {
 	justify-content: center;
 }
 
+.topbar__search-btn {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	height: calc(15px + 1rem);
+}
+
 /* ── Page header (entity / list title block) ──
    Layout: [icon] [body{title, meta}] [actions]
 */
@@ -374,6 +382,7 @@ body {
 }
 
 .search-result-row {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
@@ -389,6 +398,34 @@ body {
 	flex-shrink: 0;
 	display: inline-flex;
 	align-items: center;
+}
+
+/* ── List toolbar (text filter + chips) ── */
+
+.list-toolbar {
+	margin: 0;
+	padding: 1em 0;
+}
+
+.list .list-toolbar {
+	max-width: 860px;
+}
+
+.entity .list-toolbar {
+	padding-bottom: 0;
+}
+
+.list-toolbar__input-wrap {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.list-toolbar__input-wrap .kbd-chip {
+	position: absolute;
+	right: 8px;
+	pointer-events: none;
 }
 
 /* ── Two-column form/import layout ── */

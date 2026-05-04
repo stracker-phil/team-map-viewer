@@ -1,6 +1,6 @@
 # SPEC-008: Project detail
 
-**Status:** Established (updated 2026-04-27 — ProjectDetailMain extraction, ProjectItem hover popup, mobile people fallback uses PersonItem; owner now SquadCard; Repos section added)
+**Status:** Established (updated 2026-04-27 — ProjectDetailMain extraction, ProjectItem hover popup, mobile people fallback uses PersonItem; owner now SquadCard; Repos section added; updated 2026-05-04 — ⌘F in-page filter added)
 
 ## Overview
 
@@ -39,6 +39,15 @@ The org chart is hidden. A stacked list grouped by role replaces it. Role order:
 ## Sources
 
 If any claim for the project has a non-empty `source`, a de-emphasized "SOURCES" block appears below the people section listing each unique source string and how many claims cite it.
+
+## In-page text filter
+
+A `<ListSearch>` field appears between the page header and the detail layout. `⌘F`/`Ctrl+F` focuses it (browser find suppressed). Typing filters by entity name (case-insensitive substring):
+
+- **Repos** — matched by repo name.
+- **People / org chart** — both the OrgChart (visual) and the mobile-fallback `PeopleContent` list are filtered by person name. Nodes/rows not matching the query are excluded.
+
+The Owner block is never filtered. Filter is not applied in compact/popup mode.
 
 ## Layout
 

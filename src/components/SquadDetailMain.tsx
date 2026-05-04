@@ -10,9 +10,10 @@ import { Entity, Claim } from '../types';
 interface Props {
 	squadId: string;
 	compact?: boolean;
+	filterQuery?: string;
 }
 
-export function SquadDetailMain({ squadId, compact }: Props) {
+export function SquadDetailMain({ squadId, compact, filterQuery }: Props) {
 	const { starred, isStarred } = useStar();
 	const { claims, entityMap: map } = useData();
 	const squad = map.get(squadId);
@@ -91,6 +92,15 @@ export function SquadDetailMain({ squadId, compact }: Props) {
 		);
 	}, [ownedClaims, ownedProjects, claims, map, starred]);
 
+	const q = filterQuery?.trim().toLowerCase() ?? '';
+	const filteredMembersByRole = q
+		? membersByRole
+			.map(({ role, items }) => ({ role, items: items.filter(x => x.person.name.toLowerCase().includes(q)) }))
+			.filter(({ items }) => items.length > 0)
+		: membersByRole;
+	const filteredOwnedProjects = q ? ownedProjects.filter(x => x.project.name.toLowerCase().includes(q)) : ownedProjects;
+	const filteredOwnedRepos = q ? ownedRepos.filter(x => x.repo.name.toLowerCase().includes(q)) : ownedRepos;
+
 	if (compact) {
 		return (
 			<div className='popup__body'>
@@ -142,10 +152,10 @@ export function SquadDetailMain({ squadId, compact }: Props) {
 				<div className='block__heading'>
 					People · {String(memberClaims.length).padStart(2, '0')}
 				</div>
-				{membersByRole.length === 0 ? (
-					<p className='block__empty'>No members recorded yet.</p>
+				{filteredMembersByRole.length === 0 ? (
+					<p className='block__empty'>{membersByRole.length === 0 ? 'No members recorded yet.' : 'No matches.'}</p>
 				) : (
-					membersByRole.map(({ role, items }) => (
+					filteredMembersByRole.map(({ role, items }) => (
 						<div key={role} className='squad-role-group'>
 							<div className='squad-card__section-label'>{role}</div>
 							<ul className='entity-list'>
@@ -165,27 +175,31 @@ export function SquadDetailMain({ squadId, compact }: Props) {
 					<div className='block__heading'>
 						Projects · {String(ownedProjects.length).padStart(2, '0')}
 					</div>
-					{ownedProjects.length === 0 ? (
-						<p className='block__empty'>No owned projects recorded yet.</p>
+					{filteredOwnedProjects.length === 0 ? (
+						<p className='block__empty'>{ownedProjects.length === 0 ? 'No owned projects recorded yet.' : 'No matches.'}</p>
 					) : (
 						<ul className='entity-list'>
-							{ownedProjects.map(({ project, claim }) => (
+							{filteredOwnedProjects.map(({ project, claim }) => (
 								<ProjectItem key={project.id} project={project} claim={claim} />
 							))}
 						</ul>
 					)}
 				</div>
 
-				{ownedRepos.length > 0 && (
+				{(filteredOwnedRepos.length > 0 || (q && ownedRepos.length > 0)) && (
 					<div className='block'>
 						<div className='block__heading'>
 							Repos · {String(ownedRepos.length).padStart(2, '0')}
 						</div>
-						<ul className='entity-list'>
-							{ownedRepos.map(({ repo, claim }) => (
-								<RepoItem key={repo.id} repo={repo} claim={claim} />
-							))}
-						</ul>
+						{filteredOwnedRepos.length === 0 ? (
+							<p className='block__empty'>No matches.</p>
+						) : (
+							<ul className='entity-list'>
+								{filteredOwnedRepos.map(({ repo, claim }) => (
+									<RepoItem key={repo.id} repo={repo} claim={claim} />
+								))}
+							</ul>
+						)}
 					</div>
 				)}
 			</div>

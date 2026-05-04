@@ -98,11 +98,6 @@ body {
 }
 
 .topbar__search-btn {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.5rem;
-	height: calc(15px + 1rem);
 	background: none;
 	border: 1px solid var(--border-solid);
 	border-radius: 4px;
@@ -946,23 +941,6 @@ body {
 
 /* ── List toolbar (text filter + chips) ── */
 
-.list-toolbar {
-	margin-bottom: 1rem;
-}
-
-.list-toolbar__input-wrap {
-	position: relative;
-	display: inline-flex;
-	align-items: center;
-	width: 280px;
-}
-
-.list-toolbar__input-wrap .kbd-chip {
-	position: absolute;
-	right: 8px;
-	pointer-events: none;
-}
-
 .list-toolbar__search {
 	font-family: 'JetBrains Mono', monospace;
 	font-size: 13px;
@@ -980,6 +958,7 @@ body {
 	color: var(--muted);
 }
 
+.list-toolbar__search:hover,
 .list-toolbar__search:focus {
 	border-color: var(--text);
 }

@@ -1,6 +1,6 @@
 # ADR-017: *DetailMain component pattern
 
-**Status:** Accepted (amended 2026-04-27 — `pdm-*` classes replaced with shared `block`/`stack`/`cols-2` system; compact mode returns body-only; amended 2026-04-28 — popup header merged into EntityPopup; `PopupHeader` component deleted; `*DetailMain` compact mode no longer references header)
+**Status:** Accepted (amended 2026-04-27 — `pdm-*` classes replaced with shared `block`/`stack`/`cols-2` system; compact mode returns body-only; amended 2026-04-28 — popup header merged into EntityPopup; `PopupHeader` component deleted; `*DetailMain` compact mode no longer references header; amended 2026-05-04 — `filterQuery` prop added for full-mode in-page filtering)
 
 ## Context
 
@@ -18,9 +18,13 @@ Each entity type that has a detail view and appears in lists gets a `*DetailMain
 - `SquadDetailMain` — squad (compact + full mode)
 
 Each component:
-- Accepts `entityId: string` and `compact?: boolean`, calls `useData()` internally.
+- Accepts `entityId: string`, `compact?: boolean`, and `filterQuery?: string`; calls `useData()` internally.
 - In **full mode** (default): renders `<div className="detail-main">` — the main column of the corresponding detail page. All `useMemo` derivations run here; the view shell (header, back-link, `LinksSidebar`) stays in the view file.
-- In **compact mode** (`compact`): returns only the body — a `.popup__body` (optionally `--split`) with `.popup__col` children. The sticky header is **not** included here; `EntityPopup` builds it internally from its own `entity`/`meta` props.
+- In **compact mode** (`compact`): returns only the body — a `.popup__body` (optionally `--split`) with `.popup__col` children. The sticky header is **not** included here; `EntityPopup` builds it internally from its own `entity`/`meta` props. `filterQuery` is ignored in compact mode — filtering is a full-page concern only.
+
+### In-page text filter (full mode)
+
+Each detail view manages a `filterQuery` string in local state and renders `<ListSearch>` between the page-header and the `.detail-layout`. The filter is passed as `filterQuery` to the `*DetailMain` and applied as a case-insensitive substring match against entity names in every rendered section. The view root carries `className="entity type-{type}"` which layout.css uses to scope `.list-toolbar` padding (no bottom padding on detail pages, since no chip row follows). Compact mode always receives no `filterQuery` — popups are never filterable.
 
 ### Shared block components (inline in each `*DetailMain` file)
 

@@ -80,7 +80,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					>
 						<span className='nav-item__icon'><Boxes size={14} /></span>
 						Squads
-						<span className='nav-item__count'>{pad(squads.length)}</span>
+						<KbdChip label='⌘1' match={e => (e.metaKey || e.ctrlKey) && e.key === '1'} onTrigger={() => navigate('/')} preventDefault />
 					</NavLink>
 					<NavLink
 						to='/roles'
@@ -88,7 +88,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					>
 						<span className='nav-item__icon'><Users size={14} /></span>
 						People
-						<span className='nav-item__count'>{pad(people.length)}</span>
+						<KbdChip label='⌘2' match={e => (e.metaKey || e.ctrlKey) && e.key === '2'} onTrigger={() => navigate('/roles')} preventDefault />
 					</NavLink>
 					<NavLink
 						to='/projects'
@@ -96,7 +96,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					>
 						<span className='nav-item__icon'><FolderGit2 size={14} /></span>
 						Projects
-						<span className='nav-item__count'>{pad(projects.length)}</span>
+						<KbdChip label='⌘3' match={e => (e.metaKey || e.ctrlKey) && e.key === '3'} onTrigger={() => navigate('/projects')} preventDefault />
 					</NavLink>
 					<NavLink
 						to='/repos'
@@ -104,7 +104,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 					>
 						<span className='nav-item__icon'><GitBranch size={14} /></span>
 						Repos
-						<span className='nav-item__count'>{pad(repos.length)}</span>
+						<KbdChip label='⌘4' match={e => (e.metaKey || e.ctrlKey) && e.key === '4'} onTrigger={() => navigate('/repos')} preventDefault />
 					</NavLink>
 				</div>
 

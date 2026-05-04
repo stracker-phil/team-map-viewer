@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { Avatar } from '../components/Avatar';
 import { LinksSidebar } from '../components/LinksSidebar';
+import { ListSearch } from '../components/ListSearch';
 import { PersonDetailMain } from '../components/PersonDetailMain';
 import { StarButton } from '../components/StarButton';
 
@@ -10,6 +12,7 @@ export function PersonDetail() {
 	const { id } = useParams<{ id: string }>();
 	const { claims, entityMap: map, personRoleMap: roleMap } = useData();
 	const navigate = useNavigate();
+	const [filterQuery, setFilterQuery] = useState('');
 	const person = id ? map.get(id) : undefined;
 
 	if (!person || person.type !== 'person') {
@@ -25,7 +28,7 @@ export function PersonDetail() {
 	}
 
 	return (
-		<div>
+		<div className='entity type-person'>
 			<button className='back-link' onClick={() => navigate(-1)}>
 				<ArrowLeft size={13} />
 				BACK
@@ -49,8 +52,9 @@ export function PersonDetail() {
 					</div>
 				</div>
 
+				<ListSearch value={filterQuery} onChange={setFilterQuery} />
 				<div className='detail-layout'>
-					<PersonDetailMain personId={person.id} />
+					<PersonDetailMain personId={person.id} filterQuery={filterQuery} />
 					<LinksSidebar claims={claims} entityId={person.id} />
 				</div>
 			</div>

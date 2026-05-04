@@ -61,7 +61,7 @@ export function ProjectsList() {
 	}
 
 	return (
-		<div>
+		<div className='list type-project'>
 			<div className='section-intro'>
 				<h1 className='section-intro__title'>
 					<FolderGit2 size={26} />

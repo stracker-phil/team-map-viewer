@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GitBranch, ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { LinksSidebar } from '../components/LinksSidebar';
+import { ListSearch } from '../components/ListSearch';
 import { RepoDetailMain } from '../components/RepoDetailMain';
 import { StarButton } from '../components/StarButton';
 
@@ -9,6 +11,7 @@ export function RepoDetail() {
 	const { id } = useParams<{ id: string }>();
 	const { claims, entityMap: map } = useData();
 	const navigate = useNavigate();
+	const [filterQuery, setFilterQuery] = useState('');
 	const repo = id ? map.get(id) : undefined;
 
 	if (!repo || repo.type !== 'repo') {
@@ -24,7 +27,7 @@ export function RepoDetail() {
 	}
 
 	return (
-		<div>
+		<div className='entity type-repo'>
 			<button className='back-link' onClick={() => navigate(-1)}>
 				<ArrowLeft size={13} />
 				BACK
@@ -44,8 +47,9 @@ export function RepoDetail() {
 					</div>
 				</div>
 
+				<ListSearch value={filterQuery} onChange={setFilterQuery} />
 				<div className='detail-layout'>
-					<RepoDetailMain repoId={repo.id} />
+					<RepoDetailMain repoId={repo.id} filterQuery={filterQuery} />
 					<LinksSidebar claims={claims} entityId={repo.id} entity={repo} />
 				</div>
 			</div>

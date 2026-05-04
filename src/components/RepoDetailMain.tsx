@@ -10,6 +10,7 @@ import { Entity, Claim } from '../types';
 interface Props {
 	repoId: string;
 	compact?: boolean;
+	filterQuery?: string;
 }
 
 interface ContributorsBlockProps {
@@ -56,7 +57,9 @@ function UsagesBlock({ usages }: { usages: Entity[] }) {
 	if (!usages.length) return null;
 	return (
 		<div className='block'>
-			<div className='block__heading'>Used by <span className='block__heading-count'>{usages.length}</span></div>
+			<div className='block__heading'>Used by <span
+				className='block__heading-count'
+			>{usages.length}</span></div>
 			<ul className='entity-list'>
 				{usages.map(repo => (
 					<RepoItem key={repo.id} repo={repo} />
@@ -88,7 +91,7 @@ function ContributorsBlock({ contributors }: ContributorsBlockProps) {
 	);
 }
 
-export function RepoDetailMain({ repoId, compact }: Props) {
+export function RepoDetailMain({ repoId, compact, filterQuery }: Props) {
 	const { claims, entityMap: map, repoDepsMap, repoUsagesMap } = useData();
 	const { starred, isStarred } = useStar();
 	const repo = map.get(repoId);
@@ -132,6 +135,15 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 		[projectClaims, map, starred],
 	);
 
+	const q = filterQuery?.trim().toLowerCase() ?? '';
+	const filteredContributors = q ? contributors.filter(x => x.person.name.toLowerCase().includes(q)) : contributors;
+	const filteredProjects = q ? projects.filter(x => x.project.name.toLowerCase().includes(q)) : projects;
+	const filteredDeps = q ? deps.filter(x => (x.entity?.name ?? x.label).toLowerCase().includes(q)) : deps;
+	const filteredUsages = q ? usages.filter(x => x.name.toLowerCase().includes(q)) : usages;
+	const hasLeft = filteredProjects.length > 0 || filteredDeps.length > 0 || filteredUsages.length > 0;
+	const hasRight = filteredContributors.length > 0;
+	const isSplit = hasLeft && hasRight;
+
 	if (compact) {
 		return (
 			<div className='popup__body'>
@@ -147,14 +159,19 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 
 	return (
 		<div className='detail-main'>
-			<div className='cols-2'>
-				<div className='stack'>
-					<ProjectsBlock projects={projects} />
-					<DependenciesBlock deps={deps} />
-					<UsagesBlock usages={usages} />
-				</div>
-
-				<ContributorsBlock contributors={contributors} />
+			<div className={isSplit ? 'cols-2' : 'stack'}>
+				{hasLeft && (
+					<div className='stack'>
+						<ProjectsBlock projects={filteredProjects} />
+						<DependenciesBlock deps={filteredDeps} />
+						<UsagesBlock usages={filteredUsages} />
+					</div>
+				)}
+				{hasRight && (
+					<div className='stack'>
+						<ContributorsBlock contributors={filteredContributors} />
+					</div>
+				)}
 			</div>
 		</div>
 	);

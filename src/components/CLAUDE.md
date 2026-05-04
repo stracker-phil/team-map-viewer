@@ -7,8 +7,8 @@
 ## *DetailMain pattern
 
 `PersonDetailMain`, `ProjectDetailMain`, `RepoDetailMain`, `SquadDetailMain` serve double duty:
-- **Full mode:** renders `<div className="detail-main">` for the detail page.
-- **Compact mode:** returns body only — `.popup__body` (optionally `--split`) with `.popup__col` children. Header built inside `EntityPopup` from `entity`/`meta` props — never include header markup in compact output.
+- **Full mode:** renders `<div className="detail-main">` for the detail page. Accepts `filterQuery?: string` — case-insensitive substring applied to all entity names in every section. The view shell manages filter state and renders `<ListSearch>` between the page header and `.detail-layout`.
+- **Compact mode:** returns body only — `.popup__body` (optionally `--split`) with `.popup__col` children. Header built inside `EntityPopup` from `entity`/`meta` props — never include header markup in compact output. `filterQuery` is ignored in compact mode.
 
 Sections use `.block` class — card surface in full mode; `.popup .block` strips it in compact. `.block--bare` strips explicitly (used for SquadCard stack). People groups always stacked (role sublabel → list), not a grid. All `useMemo` calls before any conditional early return. See [ADR-017](../../adr/017-detail-main-pattern.md).
 
@@ -32,6 +32,16 @@ Wraps `EntityPopup as="button"` — click navigates to squad detail, hover (1000
 ## Detail page sections
 
 `.block` class: card background `var(--surface)`, `.block__heading`, `.block__empty`. `.popup .block` strips surface. `.block--bare` strips explicitly. `LinksSidebar` uses `background: var(--sidebar-bg)` via `.links-sidebar`; sticky offset from `.detail-aside` in `layout.css`.
+
+## List filtering components
+
+`<ListSearch value onChange placeholder?>` — controlled text input for filtering. Owns the `.list-toolbar` wrapper div. Mounts a `<KbdChip>` for `⌘F`/`Ctrl+F` absolutely positioned inside the input (right edge). Used in list views (RoleList, ProjectsList, ReposList) and all detail views (PersonDetail, ProjectDetail, RepoDetail, SquadDetail). On detail pages, placed between the page-header and `.detail-layout`.
+
+`<FilterChips items active onChange allLabel? allCount>` — renders `.role-filters` chip row. `items: FilterChipItem[]` = `{ value, label, count }`. `active` = currently selected value or `null` (= ALL). Clicking active chip returns to `null`. Returns `null` when `items` is empty. Used by all three list views for category/owner/PHP filtering.
+
+## KbdChip
+
+`<KbdChip label match onTrigger preventDefault?>` — renders `.kbd-chip` span and mounts one stable `window` keydown listener (via internal refs, effect runs once). Listener lifetime = component mount/unmount, so placement determines scope automatically. See [ADR-021](../../adr/021-kbd-chip-shortcut-pattern.md).
 
 ## OrgChart
 

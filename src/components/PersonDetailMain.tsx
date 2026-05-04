@@ -21,6 +21,7 @@ const MANAGES_TYPE_LABELS: Record<string, string> = {
 interface Props {
 	personId: string;
 	compact?: boolean;
+	filterQuery?: string;
 }
 
 function SquadsBlock({ squads }: { squads: { squad: Entity; claim: Claim }[] }) {
@@ -118,9 +119,10 @@ function PeopleBlock({
 	);
 }
 
-export function PersonDetailMain({ personId, compact }: Props) {
+export function PersonDetailMain({ personId, compact, filterQuery }: Props) {
 	const { claims, entityMap: map } = useData();
 	const { starred, isStarred } = useStar();
+	const q = filterQuery?.trim().toLowerCase() ?? '';
 
 	const reportsClaims = useMemo(
 		() => filterClaims(claims, { subject: personId, relation: 'reports-to' }),
@@ -221,37 +223,54 @@ export function PersonDetailMain({ personId, compact }: Props) {
 			);
 	}, [repoClaims, projectClaims, map, starred]);
 
-	const isEmpty = squads.length === 0 && projects.length === 0 && repos.length === 0 &&
-		reportTypes.length === 0 && managesTypes.length === 0;
+	const filteredSquads = q ? squads.filter(x => x.squad.name.toLowerCase().includes(q)) : squads;
+	const filteredProjects = q ? projects.filter(x => x.project.name.toLowerCase().includes(q)) : projects;
+	const filteredRepos = q ? repos.filter(x => x.repo.name.toLowerCase().includes(q)) : repos;
+	const filteredReportsByType = q
+		? new Map([...reportsByType.entries()].map(([t, items]) =>
+			[t, items.filter(x => x.manager.name.toLowerCase().includes(q))]))
+		: reportsByType;
+	const filteredManagesByType = q
+		? new Map([...managesByType.entries()].map(([t, items]) =>
+			[t, items.filter(x => x.report.name.toLowerCase().includes(q))]))
+		: managesByType;
+	const filteredReportTypes = reportTypes.filter(t => filteredReportsByType.get(t)?.length);
+	const filteredManagesTypes = managesTypes.filter(t => filteredManagesByType.get(t)?.length);
 
-	const hasLeft = squads.length > 0 || repos.length > 0 || reportTypes.length > 0 || managesTypes.length > 0;
-	const hasRight = projects.length > 0;
+	const isEmpty = filteredSquads.length === 0 && filteredProjects.length === 0 && filteredRepos.length === 0 &&
+		filteredReportTypes.length === 0 && filteredManagesTypes.length === 0;
+
+	const compactHasLeft = squads.length > 0 || repos.length > 0 || reportTypes.length > 0 || managesTypes.length > 0;
+	const compactHasRight = projects.length > 0;
+	const compactPeopleProps: PeopleBlockProps = { reportsByType, managesByType, reportTypes, managesTypes, isStarred };
+
+	const hasLeft = filteredSquads.length > 0 || filteredRepos.length > 0 || filteredReportTypes.length > 0 || filteredManagesTypes.length > 0;
+	const hasRight = filteredProjects.length > 0;
 	const isSplit = hasLeft && hasRight;
-
 	const peopleProps: PeopleBlockProps = {
-		reportsByType,
-		managesByType,
-		reportTypes,
-		managesTypes,
+		reportsByType: filteredReportsByType,
+		managesByType: filteredManagesByType,
+		reportTypes: filteredReportTypes,
+		managesTypes: filteredManagesTypes,
 		isStarred,
 	};
 
 	if (compact) {
 		return (
-			<div className={`popup__body${isSplit ? ' popup__body--split' : ''}`}>
-				{hasLeft && (
+			<div className={`popup__body${(compactHasLeft && compactHasRight) ? ' popup__body--split' : ''}`}>
+				{compactHasLeft && (
 					<div className='popup__col'>
 						<SquadsBlock squads={squads} />
 						<ReposBlock repos={repos} heading='Repos' />
-						<PeopleBlock {...peopleProps} />
+						<PeopleBlock {...compactPeopleProps} />
 					</div>
 				)}
-				{hasRight && (
+				{compactHasRight && (
 					<div className='popup__col'>
 						<ProjectsBlock projects={projects} />
 					</div>
 				)}
-				{isEmpty && (
+				{!compactHasLeft && !compactHasRight && (
 					<div className='popup__col'>
 						<p className='block__empty'>No assignments recorded yet.</p>
 					</div>
@@ -270,14 +289,14 @@ export function PersonDetailMain({ personId, compact }: Props) {
 				<div className={isSplit ? 'cols-2' : 'stack'}>
 					{hasLeft && (
 						<div className='stack'>
-							<SquadsBlock squads={squads} />
-							<ReposBlock repos={repos} heading='Other Repos' />
+							<SquadsBlock squads={filteredSquads} />
+							<ReposBlock repos={filteredRepos} heading='Other Repos' />
 							<PeopleBlock {...peopleProps} />
 						</div>
 					)}
 					{hasRight && (
 						<div className='stack'>
-							<ProjectsBlock projects={projects} />
+							<ProjectsBlock projects={filteredProjects} />
 						</div>
 					)}
 				</div>

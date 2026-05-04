@@ -23,6 +23,7 @@ const ROLE_LABELS: Record<string, string> = {
 interface Props {
 	projectId: string;
 	compact?: boolean;
+	filterQuery?: string;
 }
 
 function OwnerBlock({ owner }: { owner: Entity }) {
@@ -96,7 +97,7 @@ function PeopleBlock(props: PeopleContentProps) {
 	);
 }
 
-export function ProjectDetailMain({ projectId, compact }: Props) {
+export function ProjectDetailMain({ projectId, compact, filterQuery }: Props) {
 	const { claims, entityMap: map } = useData();
 	const { starred, isStarred } = useStar();
 	const project = map.get(projectId);
@@ -145,8 +146,20 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 		[repoClaims, map, starred],
 	);
 
+	const q = filterQuery?.trim().toLowerCase() ?? '';
+	const filteredRepos = q ? repos.filter(x => x.repo.name.toLowerCase().includes(q)) : repos;
+	const filteredGrouped = useMemo(() => {
+		if (!q) return grouped;
+		const result: Record<string, Claim[]> = {};
+		for (const [key, claimList] of Object.entries(grouped)) {
+			const filtered = claimList.filter(c => map.get(c.subject)?.name.toLowerCase().includes(q));
+			if (filtered.length) result[key] = filtered;
+		}
+		return result;
+	}, [grouped, map, q]);
+
 	const owningTeam = ownerClaim ? map.get(ownerClaim.object) : undefined;
-	const peopleProps: PeopleContentProps = { grouped, entityMap: map, isStarred };
+	const peopleProps: PeopleContentProps = { grouped: filteredGrouped, entityMap: map, isStarred };
 
 	if (compact) {
 		return (
@@ -174,13 +187,14 @@ export function ProjectDetailMain({ projectId, compact }: Props) {
 				</div>
 			)}
 
-			<ReposBlock repos={repos} />
+			<ReposBlock repos={filteredRepos} />
 
 			<div className='block'>
 				<div className='block__heading'>People</div>
 				<div className='org-chart-wrap'>
 					<OrgChart
-						claims={worksClaims} entityMap={map} projectName={project?.name ?? ''}
+						claims={q ? worksClaims.filter(c => map.get(c.subject)?.name.toLowerCase().includes(q)) : worksClaims}
+						entityMap={map} projectName={project?.name ?? ''}
 					/>
 				</div>
 				<div className='people-fallback'>

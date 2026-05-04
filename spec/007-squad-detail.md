@@ -1,6 +1,6 @@
 # SPEC-007: Squad detail
 
-**Status:** Established (updated 2026-04-27 — added Repos section below Projects; removed cross-highlight dim interaction 2026-04-26)
+**Status:** Established (updated 2026-04-27 — added Repos section below Projects; removed cross-highlight dim interaction 2026-04-26; updated 2026-05-04 — ⌘F in-page filter added)
 
 ## Overview
 
@@ -40,6 +40,16 @@ On screens narrower than 768 px the three columns stack vertically.
   2. `belongs-to` claim pointing to any project owned by the squad.
 - Deduped by repo ID.
 - Sorted starred-first, then alphabetically by name.
+
+## In-page text filter
+
+A `<ListSearch>` field appears between the page header and the detail layout. `⌘F`/`Ctrl+F` focuses it (browser find suppressed). Typing filters all sections by entity name (case-insensitive substring):
+
+- **People** — matched by person name; role-groups with zero matches are hidden. Empty state shows "No matches." if people exist but none match.
+- **Projects** — matched by project name. Empty state shows "No matches." if projects exist but none match.
+- **Repos** — matched by repo name. The Repos block stays visible (with "No matches." text) while a query is active and repos exist, so the section heading remains as a reference. Hidden entirely when there are no repos and no active query.
+
+Filter is not applied in compact/popup mode.
 
 ## No cross-highlight interaction
 

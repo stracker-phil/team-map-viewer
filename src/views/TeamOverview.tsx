@@ -28,7 +28,7 @@ export function TeamOverview() {
 	}
 
 	return (
-		<div>
+		<div className='list type-squad'>
 			<div className='section-intro'>
 				<h1 className='section-intro__title'>
 					<Boxes size={26} />

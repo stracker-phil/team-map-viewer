@@ -1,6 +1,6 @@
 # SPEC-015: Repos view
 
-**Status:** Established (2026-04-26; updated 2026-04-27 — starred repos sort to top; updated 2026-05-04 — PHP column, filter chips, text filter)
+**Status:** Established (2026-04-26; updated 2026-04-27 — starred repos sort to top; updated 2026-05-04 — PHP column, filter chips, text filter; updated 2026-05-04 — ALL chip shows total repo count)
 
 ## Overview
 
@@ -14,7 +14,7 @@ A `<ListSearch>` input appears above the filter chips. Filters by repo name or i
 
 A row of `<FilterChips>` appears below the text filter whenever ≥2 distinct PHP versions exist across repos OR any repos have no PHP version alongside those that do:
 
-- **ALL PHP · {N}** — resets filter; count = repos with any PHP `uses` claim.
+- **ALL · {N}** — resets filter; count = total number of repos (all, not just those with PHP).
 - **PHP {version} · {N}** — one chip per distinct version string (e.g. `8.1`, `8.3`), sorted ascending.
 - **NO PHP · {N}** — shown when ≥1 repo has no PHP `uses` claim; filters to those repos.
 

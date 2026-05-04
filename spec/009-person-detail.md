@@ -1,6 +1,6 @@
 # SPEC-009: Person detail
 
-**Status:** Established (updated 2026-04-27 — 2-col main layout, stacked people list, squad cards without wrapper card)
+**Status:** Established (updated 2026-04-27 — 2-col main layout, stacked people list, squad cards without wrapper card; updated 2026-05-04 — ⌘F in-page filter added)
 
 ## Overview
 
@@ -69,3 +69,14 @@ Rendered as a stacked list in both full and compact mode: each role group shows 
 ### Empty state (whole page)
 
 If all four sections are empty: single card showing "No assignments recorded yet."
+
+## In-page text filter
+
+A `<ListSearch>` field appears between the page header and the detail layout. `⌘F`/`Ctrl+F` focuses it (browser find suppressed). Typing filters all sections simultaneously by entity name (case-insensitive substring):
+
+- **Squads** — matched by squad name.
+- **Projects** — matched by project name.
+- **Other Repos** — matched by repo name.
+- **People** — matched by manager/report name; groups with zero matches are hidden.
+
+The 2-col vs 1-col layout is recomputed based on filtered content — if filtering empties one side, the other side expands to full width. An empty filter (or clearing the field) restores all items. Filter is not applied in compact/popup mode.
