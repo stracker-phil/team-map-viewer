@@ -12,6 +12,7 @@ Replace the two-CSV format with a single `team.json` file. Top-level structure:
 
 ```json
 {
+  "config": { ... },
   "entities": [
     { "id": "...", "name": "...", "type": "...", "meta": "..." }
   ],
@@ -21,7 +22,7 @@ Replace the two-CSV format with a single `team.json` file. Top-level structure:
 }
 ```
 
-The logical data model (entities + claims, same fields and relation types) is unchanged.
+`config` is optional — see [ADR-020](020-config-block.md) for its shape and runtime behaviour. The logical data model (entities + claims, same fields and relation types) is unchanged.
 
 `src/utils/csv.ts` now exports `parseTeamJson(json: string)` and `exportTeamJson(entities, claims)` using native `JSON.parse`/`JSON.stringify` — PapaParse removed. The `repo/` prefix stripping convention is preserved in the JSON parser.
 

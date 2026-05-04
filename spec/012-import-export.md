@@ -11,13 +11,14 @@ Users supply their own org data by pasting or uploading a `team.json` file. The 
 - Accessible via the "IMPORT" button in the header, the demo banner link, or the standalone `#/import` route.
 - When opened from the header, renders as a modal overlay (backdrop blur, centered). When navigated to directly, renders as a full page.
 - Contains one full-width textarea for JSON content and a single "UPLOAD" file input (accepts `.json`).
-- When real data is already loaded (not demo mode), the textarea is pre-populated with `exportTeamJson(entities, claims)` so the user can review, select, or copy the JSON that is currently active.
+- When real data is already loaded (not demo mode), the textarea is pre-populated with `exportTeamJson(entities, claims, config)` so the user can review, select, or copy the JSON that is currently active (including any `config` block).
 - In demo mode the textarea is empty.
 
 ## JSON format
 
 ```json
 {
+  "config": { ... },
   "entities": [
     { "id": "...", "name": "...", "type": "...", "meta": "..." }
   ],
@@ -26,6 +27,8 @@ Users supply their own org data by pasting or uploading a `team.json` file. The 
   ]
 }
 ```
+
+The top-level `config` key is optional. When present, it controls branding, page descriptions, theme color overrides, and footer text. See ADR-020 for the full shape and runtime behaviour.
 
 See SPEC-001 for entity fields, claim fields, and valid relation types.
 
@@ -44,7 +47,7 @@ See SPEC-001 for entity fields, claim fields, and valid relation types.
 
 ## Persistence
 
-On successful import, entities and claims are JSON-serialised and written to `localStorage` under the key `team-map-v1`. Demo mode ends. The app immediately re-renders with the new data.
+On successful import, `config`, entities, and claims are JSON-serialised and written to `localStorage` under the key `team-map-v1`. Demo mode ends. The app immediately re-renders with the new data.
 
 ## Data reset
 

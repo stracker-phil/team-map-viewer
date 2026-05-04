@@ -8,7 +8,7 @@ Real organizational data must never leave the user's machine. A backend would re
 
 ## Decision
 
-Persist imported data in `localStorage` under key `team-map-v1` as a JSON blob `{entities, claims}`. Implemented in `src/context/DataContext.tsx`. On first load (no stored data), sample data is auto-loaded into a "demo mode" that is not persisted.
+Persist imported data in `localStorage` under key `team-map-v1` as a JSON blob `{config?, entities, claims}`. Implemented in `src/context/DataContext.tsx`. On first load (no stored data), sample data is auto-loaded into a "demo mode" that is not persisted.
 
 ## Consequences
 

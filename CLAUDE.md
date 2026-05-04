@@ -27,12 +27,13 @@ src/
   components/             shared UI — see src/components/CLAUDE.md
   views/                  route views — see src/views/CLAUDE.md
 data/team.json            template data, no real data
-adr/                      architectural decisions (ADR-001 – ADR-019)
+adr/                      architectural decisions (ADR-001 – ADR-020)
 spec/                     behavioral specs (SPEC-001 – SPEC-015)
 ```
 
 ## Data model
 
+- **Config:** optional top-level `config` key in `team.json` — controls brand name, per-page descriptions, theme color overrides, and footer. Parsed into `AppConfig`, stored in `DataContext`, exposed via `useData().config`. CSS vars injected at runtime via `useEffect`. See [ADR-020](adr/020-config-block.md).
 - **Entities:** `person`, `project`, `squad`, `repo`. Hold no structure — all relationships are claims. See [ADR-004](adr/004-two-csv-data-model.md) and [ADR-019](adr/019-json-data-format.md).
 - **Claims:** `{ subject, relation, object, detail?, source?, verified? }` in `team.json`.
 - **Key relations:** `works-on` (person→project), `contributes-to` (person→repo), `belongs-to` (repo→project), `owned-by` (project/repo→squad), `member-of` (person→squad), `role` (person→title string), `link` (entity→URL).
@@ -44,6 +45,8 @@ spec/                     behavioral specs (SPEC-001 – SPEC-015)
 ## Design system
 
 `--bg: #fafafa`, `--surface: #E1E3E2` (cards), `--sidebar-bg: #FFDBCC` (links sidebar), teal accent `#1F4842`. Fraunces/Geist/JetBrains Mono fonts. Cards use background color for depth — no decorative borders. Fixed 48px topbar; CMD+K (`⌘K`/`Ctrl+K`) opens search overlay. See [ADR-012](adr/012-editorial-design-system.md).
+
+CSS vars (`--bg`, `--surface`, `--sidebar-bg`, `--accent`, `--text`, `--muted`) can be overridden at runtime via `config.theme.colors` in `team.json` — set on `:root` by `DataProvider`. Absent keys fall back to stylesheet defaults via `removeProperty`.
 
 Type badges: `.type-badge.type-badge--{type}`. CSS vars `--type-{person,squad,project,repo}-{bg,text}` on `:root`. Used in CMD+K results.
 
