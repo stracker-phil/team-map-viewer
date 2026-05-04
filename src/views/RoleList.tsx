@@ -4,6 +4,8 @@ import { Users } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 import { PersonItem } from '../components/PersonItem';
+import { ListSearch } from '../components/ListSearch';
+import { FilterChips, FilterChipItem } from '../components/FilterChips';
 import { Entity } from '../types';
 
 export function RoleList() {
@@ -11,19 +13,26 @@ export function RoleList() {
 	const { starred, isStarred } = useStar();
 	const navigate = useNavigate();
 
-	const allRoles = useMemo(() => {
+	const [roleFilter, setRoleFilter] = useState<string | null>(null);
+	const [textFilter, setTextFilter] = useState('');
+
+	const roleChips = useMemo<FilterChipItem[]>(() => {
 		const counts = new Map<string, number>();
 		people.forEach(p => {
 			if (!p.meta) return;
 			counts.set(p.meta, (counts.get(p.meta) ?? 0) + 1);
 		});
-		return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+		return [...counts.entries()]
+			.sort((a, b) => b[1] - a[1])
+			.map(([role, count]) => ({ value: role, label: role.toUpperCase(), count }));
 	}, [people]);
 
-	const [roleFilter, setRoleFilter] = useState<string | null>(null);
-
 	const grouped = useMemo(() => {
-		const shown = roleFilter ? people.filter(p => p.meta === roleFilter) : people;
+		let shown = roleFilter ? people.filter(p => p.meta === roleFilter) : people;
+		if (textFilter.trim()) {
+			const q = textFilter.trim().toLowerCase();
+			shown = shown.filter(p => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
+		}
 		const m = new Map<string, Entity[]>();
 		shown.forEach(p => {
 			const r = p.meta || 'Other';
@@ -36,7 +45,7 @@ export function RoleList() {
 				role,
 				[...list].sort((a, b) => Number(isStarred(b.id)) - Number(isStarred(a.id))),
 			] as [string, Entity[]]);
-	}, [people, roleFilter, starred]);
+	}, [people, roleFilter, textFilter, starred]);
 
 	if (people.length === 0) {
 		return (
@@ -62,23 +71,13 @@ export function RoleList() {
 				)}
 			</div>
 
-			<div className='role-filters'>
-				<button
-					className={`role-filter-btn${roleFilter === null ? ' active' : ''}`}
-					onClick={() => setRoleFilter(null)}
-				>
-					ALL · {String(people.length).padStart(2, '0')}
-				</button>
-				{allRoles.map(([role, count]) => (
-					<button
-						key={role}
-						className={`role-filter-btn${roleFilter === role ? ' active' : ''}`}
-						onClick={() => setRoleFilter(roleFilter === role ? null : role)}
-					>
-						{role.toUpperCase()} · {String(count).padStart(2, '0')}
-					</button>
-				))}
-			</div>
+			<ListSearch value={textFilter} onChange={setTextFilter} />
+			<FilterChips
+				items={roleChips}
+				active={roleFilter}
+				onChange={setRoleFilter}
+				allCount={people.length}
+			/>
 
 			<div>
 				{grouped.map(([role, list]) => (

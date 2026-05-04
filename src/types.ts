@@ -7,7 +7,8 @@ export type RelationType =
 	| 'role'
 	| 'contributes-to'
 	| 'link'
-	| 'belongs-to';
+	| 'belongs-to'
+	| 'uses';
 export interface Entity {
 	id: string;
 	name: string;

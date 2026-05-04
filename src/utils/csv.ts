@@ -2,7 +2,7 @@ import { Entity, Claim, AppConfig, EntityType, RelationType } from '../types';
 
 const VALID_RELATIONS = new Set<string>([
   'works-on', 'owned-by', 'member-of', 'reports-to',
-  'role', 'contributes-to', 'link', 'belongs-to',
+  'role', 'contributes-to', 'link', 'belongs-to', 'uses',
 ]);
 
 const stripRepo = (s: string) => s.startsWith('repo/') ? s.slice(5) : s;
@@ -43,7 +43,7 @@ export function parseTeamJson(json: string): { entities: Entity[]; claims: Claim
       continue;
     }
     if (!VALID_RELATIONS.has(row.relation)) {
-      errors.push(`Invalid relation "${row.relation}" — expected works-on, owned-by, member-of, reports-to, role, contributes-to, link, or belongs-to`);
+      errors.push(`Invalid relation "${row.relation}" — expected works-on, owned-by, member-of, reports-to, role, contributes-to, link, belongs-to, or uses`);
       continue;
     }
     claims.push({

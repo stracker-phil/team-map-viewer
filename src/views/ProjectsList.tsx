@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FolderGit2 } from 'lucide-react';
 import { ProjectItem } from '../components/ProjectItem.tsx';
+import { ListSearch } from '../components/ListSearch';
+import { FilterChips, FilterChipItem } from '../components/FilterChips';
 import { useData } from '../context/DataContext';
 import { useStar } from '../context/StarContext';
 
@@ -11,39 +13,40 @@ export function ProjectsList() {
 	const navigate = useNavigate();
 
 	const [ownerFilter, setOwnerFilter] = useState<string | null>(null);
+	const [textFilter, setTextFilter] = useState('');
 
 	const activeProjects = useMemo(
 		() => projects.filter(p => squadOf.has(p.id) || (teamSize.get(p.id) ?? 0) > 0),
 		[projects, teamSize, squadOf],
 	);
 
-	const allOwners = useMemo(() => {
+	const ownerChips = useMemo<FilterChipItem[]>(() => {
 		const counts = new Map<string, number>();
 		activeProjects.forEach(p => {
 			const ownerId = squadOf.get(p.id);
 			if (!ownerId) return;
 			counts.set(ownerId, (counts.get(ownerId) ?? 0) + 1);
 		});
-		return [...counts.entries()]
-			.map(([id, count]) => ({ squad: entityMap.get(id), count }))
-			.filter((x): x is {
-				squad: NonNullable<ReturnType<typeof entityMap.get>>;
-				count: number
-			} => !!x.squad)
-			.sort((a, b) => b.count - a.count);
+		const items: FilterChipItem[] = [...counts.entries()]
+			.map(([id, count]) => ({ squad: entityMap.get(id), count, id }))
+			.filter((x): x is { squad: NonNullable<ReturnType<typeof entityMap.get>>; count: number; id: string } => !!x.squad)
+			.sort((a, b) => b.count - a.count)
+			.map(({ squad, count }) => ({ value: squad.id, label: squad.name.toUpperCase(), count }));
+		const unowned = activeProjects.filter(p => !squadOf.has(p.id)).length;
+		if (unowned > 0) items.push({ value: '__none__', label: 'OTHER', count: unowned });
+		return items;
 	}, [activeProjects, squadOf, entityMap]);
-
-	const unownedCount = useMemo(
-		() => activeProjects.filter(p => !squadOf.has(p.id)).length,
-		[activeProjects, squadOf],
-	);
 
 	const filtered = useMemo(() => {
 		let list = activeProjects;
-		if (ownerFilter === '__none__') list = activeProjects.filter(p => !squadOf.has(p.id));
-		else if (ownerFilter) list = activeProjects.filter(p => squadOf.get(p.id) === ownerFilter);
+		if (ownerFilter === '__none__') list = list.filter(p => !squadOf.has(p.id));
+		else if (ownerFilter) list = list.filter(p => squadOf.get(p.id) === ownerFilter);
+		if (textFilter.trim()) {
+			const q = textFilter.trim().toLowerCase();
+			list = list.filter(p => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
+		}
 		return [...list].sort((a, b) => Number(isStarred(b.id)) - Number(isStarred(a.id)));
-	}, [activeProjects, ownerFilter, squadOf, starred]);
+	}, [activeProjects, ownerFilter, textFilter, squadOf, starred]);
 
 	if (activeProjects.length === 0) {
 		return (
@@ -69,33 +72,13 @@ export function ProjectsList() {
 				)}
 			</div>
 
-			{allOwners.length > 0 && (
-				<div className='role-filters'>
-					<button
-						className={`role-filter-btn${ownerFilter === null ? ' active' : ''}`}
-						onClick={() => setOwnerFilter(null)}
-					>
-						ALL · {String(activeProjects.length).padStart(2, '0')}
-					</button>
-					{allOwners.map(({ squad, count }) => (
-						<button
-							key={squad.id}
-							className={`role-filter-btn${ownerFilter === squad.id ? ' active' : ''}`}
-							onClick={() => setOwnerFilter(ownerFilter === squad.id ? null : squad.id)}
-						>
-							{squad.name.toUpperCase()} · {String(count).padStart(2, '0')}
-						</button>
-					))}
-					{unownedCount > 0 && (
-						<button
-							className={`role-filter-btn${ownerFilter === '__none__' ? ' active' : ''}`}
-							onClick={() => setOwnerFilter(ownerFilter === '__none__' ? null : '__none__')}
-						>
-							OTHER · {String(unownedCount).padStart(2, '0')}
-						</button>
-					)}
-				</div>
-			)}
+			<ListSearch value={textFilter} onChange={setTextFilter} />
+			<FilterChips
+				items={ownerChips}
+				active={ownerFilter}
+				onChange={setOwnerFilter}
+				allCount={activeProjects.length}
+			/>
 
 			<table className='entity-table'>
 				<thead>

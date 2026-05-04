@@ -121,6 +121,11 @@
     { "subject": "team-support", "relation": "link", "object": "https://app.slack.com/client/T/C008", "detail": "#team-support", "source": "slack", "verified": "" },
     { "subject": "repo-api", "relation": "link", "object": "https://github.com/example/api", "detail": "example/api", "source": "github", "verified": "" },
     { "subject": "repo-web", "relation": "link", "object": "https://github.com/example/web", "detail": "example/web", "source": "github", "verified": "" },
-    { "subject": "repo-infra", "relation": "link", "object": "https://github.com/example/infra", "detail": "example/infra", "source": "github", "verified": "" }
+    { "subject": "repo-infra", "relation": "link", "object": "https://github.com/example/infra", "detail": "example/infra", "source": "github", "verified": "" },
+    { "subject": "repo-api", "relation": "uses", "object": "php8.1", "detail": "", "source": "", "verified": "" },
+    { "subject": "repo-api", "relation": "uses", "object": "repo-infra", "detail": "", "source": "", "verified": "" },
+    { "subject": "repo-web", "relation": "uses", "object": "php8.3", "detail": "", "source": "", "verified": "" },
+    { "subject": "repo-web", "relation": "uses", "object": "repo-api", "detail": "", "source": "", "verified": "" },
+    { "subject": "repo-infra", "relation": "uses", "object": "php8.3", "detail": "", "source": "", "verified": "" }
   ]
 }

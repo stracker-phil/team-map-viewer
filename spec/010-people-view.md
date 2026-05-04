@@ -1,10 +1,14 @@
 # SPEC-010: People view
 
-**Status:** Established (updated 2026-04-26 — person rows now use PersonItem with EntityPopup; updated 2026-04-27 — starred people sort to top of each role group)
+**Status:** Established (updated 2026-04-26 — person rows now use PersonItem with EntityPopup; updated 2026-04-27 — starred people sort to top of each role group; updated 2026-05-04 — text filter added)
 
 ## Overview
 
 The People view (`#/roles`) shows the full roster grouped by job title, with filter chips to narrow to a single role.
+
+## Text filter
+
+A `<ListSearch>` input appears above the filter chips. Filters by person name or id (case-insensitive substring). Applied before grouping — matching people only appear in their role group. `⌘F` / `Ctrl+F` focuses and selects the input.
 
 ## Filter chips
 

@@ -1,10 +1,14 @@
 # SPEC-011: Projects view
 
-**Status:** Established (updated 2026-04-26 — table layout replaces card grid; updated 2026-04-27 — starred projects sort to top; updated 2026-05-04 — squad-owned projects always visible)
+**Status:** Established (updated 2026-04-26 — table layout replaces card grid; updated 2026-04-27 — starred projects sort to top; updated 2026-05-04 — squad-owned projects always visible, text filter added)
 
 ## Overview
 
 The projects view (`#/projects`) shows all active projects as a sortable table with optional owner filtering.
+
+## Text filter
+
+A `<ListSearch>` input appears above the owner filter chips. Filters by project name or id (case-insensitive substring). Applied in combination with the owner chip filter. `⌘F` / `Ctrl+F` focuses and selects the input.
 
 ## Owner filter chips
 

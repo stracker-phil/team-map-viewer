@@ -144,6 +144,7 @@ These update automatically when `accent` or `text` changes — no extra config r
 | `contributes-to` | person | repo | Repo contributor |
 | `role` | person | role title string | Display title shown in person subtitle and squad member lists |
 | `link` | any entity | URL | `detail` = label, `source` = type (`jira` · `slack` · `confluence` · `github` · `website` · `wporg` · `personio`) |
+| `uses` | repo | repo id or string | Dependency. Object is a known entity id (renders as `RepoItem`) or a plain string (e.g. `"php8.2"`, renders as `<code>`). |
 
 ### Link source types
 

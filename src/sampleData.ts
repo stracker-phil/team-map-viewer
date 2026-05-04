@@ -97,5 +97,9 @@ export const SAMPLE_TEAM_JSON = JSON.stringify({
     { subject: 'repo-api', relation: 'link', object: 'https://github.com/example/api', detail: 'example/api', source: 'github', verified: '' },
     { subject: 'repo-web', relation: 'link', object: 'https://github.com/example/web', detail: 'example/web', source: 'github', verified: '' },
     { subject: 'repo-infra', relation: 'link', object: 'https://github.com/example/infra', detail: 'example/infra', source: 'github', verified: '' },
+    { subject: 'repo-api', relation: 'uses', object: 'php8.2', detail: '', source: '', verified: '' },
+    { subject: 'repo-api', relation: 'uses', object: 'repo-infra', detail: '', source: '', verified: '' },
+    { subject: 'repo-web', relation: 'uses', object: 'node20', detail: '', source: '', verified: '' },
+    { subject: 'repo-web', relation: 'uses', object: 'repo-api', detail: '', source: '', verified: '' },
   ],
 }, null, 2);

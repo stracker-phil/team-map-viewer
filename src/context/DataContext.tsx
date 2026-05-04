@@ -23,6 +23,8 @@ interface DataContextValue {
 	squadOf: Map<string, string>;        // projectId → squadId
 	personRoleMap: Map<string, string>;  // personId → role title
 	contributorCount: Map<string, number>; // repoId → contributes-to count
+	repoDepsMap: Map<string, { entity: Entity | null; label: string }[]>; // repoId → uses deps
+	repoUsagesMap: Map<string, Entity[]>; // repoId → repos that use this repo
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -161,12 +163,38 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 		return m;
 	}, [claims, entityMap]);
 
+	const repoDepsMap = useMemo(() => {
+		const m = new Map<string, { entity: Entity | null; label: string }[]>();
+		claims.filter(c => c.relation === 'uses').forEach(c => {
+			const entity = entityMap.get(c.object) ?? null;
+			const label = entity ? entity.name : c.object;
+			const deps = m.get(c.subject) ?? [];
+			deps.push({ entity, label });
+			m.set(c.subject, deps);
+		});
+		return m;
+	}, [claims, entityMap]);
+
+	const repoUsagesMap = useMemo(() => {
+		const m = new Map<string, Entity[]>();
+		claims.filter(c => c.relation === 'uses').forEach(c => {
+			const target = entityMap.get(c.object);
+			if (!target || target.type !== 'repo') return;
+			const user = entityMap.get(c.subject);
+			if (!user || user.type !== 'repo') return;
+			const list = m.get(target.id) ?? [];
+			list.push(user);
+			m.set(target.id, list);
+		});
+		return m;
+	}, [claims, entityMap]);
+
 	return (
 		<DataContext.Provider
 			value={{
 				entities, claims, config, isDemo, setData, clearData, loadSample,
 				entityMap, people, squads, projects, repos,
-				teamSize, squadOf, personRoleMap, contributorCount,
+				teamSize, squadOf, personRoleMap, contributorCount, repoDepsMap, repoUsagesMap,
 			}}
 		>
 			{children}

@@ -4,6 +4,7 @@ import { Boxes, Users, FolderGit2, GitBranch, Search, X, Upload, UserCircle2 } f
 import { useData } from '../context/DataContext';
 import { searchEntities } from '../utils/derive';
 import { ImportData } from '../views/ImportData';
+import { KbdChip } from './KbdChip';
 import { Entity } from '../types';
 
 function TypeIcon({ type }: { type: Entity['type'] }) {
@@ -21,18 +22,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	const [showImport, setShowImport] = useState(false);
 	const searchRef = useRef<HTMLInputElement>(null);
 	const navigate = useNavigate();
-
-	useEffect(() => {
-		function onKey(e: KeyboardEvent) {
-			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-				e.preventDefault();
-				setShowSearch(true);
-			}
-		}
-
-		window.addEventListener('keydown', onKey);
-		return () => window.removeEventListener('keydown', onKey);
-	}, []);
 
 	useEffect(() => {
 		if (showSearch) {
@@ -125,10 +114,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 						IMPORT
 					</button>
 					<button
-						className='topbar__icon-btn'
+						className='topbar__search-btn'
 						onClick={() => setShowSearch(true)}
 						aria-label='Search (⌘K)'
 					>
+						<KbdChip
+							label='⌘K'
+							match={e => (e.metaKey || e.ctrlKey) && e.key === 'k'}
+							onTrigger={() => setShowSearch(true)}
+							preventDefault
+						/>
 						<Search size={15} />
 					</button>
 				</div>
@@ -180,7 +175,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 									<X size={14} />
 								</button>
 							) : (
-								<span className='search-overlay__esc'>ESC</span>
+								<KbdChip
+									label='ESC'
+									match={e => e.key === 'Escape'}
+									onTrigger={() => setShowSearch(false)}
+								/>
 							)}
 						</div>
 

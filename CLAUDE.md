@@ -37,7 +37,7 @@ spec/                     behavioral specs (SPEC-001 – SPEC-015)
 - **Config:** optional top-level `config` key in `team.json` — controls brand name, per-page descriptions, theme color overrides, and footer. Parsed into `AppConfig`, stored in `DataContext`, exposed via `useData().config`. CSS vars injected at runtime via `useEffect`. See [ADR-020](adr/020-config-block.md).
 - **Entities:** `person`, `project`, `squad`, `repo`. Hold no structure — all relationships are claims. See [ADR-004](adr/004-two-csv-data-model.md) and [ADR-019](adr/019-json-data-format.md).
 - **Claims:** `{ subject, relation, object, detail?, source?, verified? }` in `team.json`.
-- **Key relations:** `works-on` (person→project), `contributes-to` (person→repo), `belongs-to` (repo→project), `owned-by` (project/repo→squad), `member-of` (person→squad), `role` (person→title string), `link` (entity→URL).
+- **Key relations:** `works-on` (person→project), `contributes-to` (person→repo), `belongs-to` (repo→project), `owned-by` (project/repo→squad), `member-of` (person→squad), `role` (person→title string), `link` (entity→URL), `uses` (repo→repo id or string — dependency, shown in repo detail Dependencies section).
 - **Role vs meta:** `entity.meta` = general category (grouping in RoleList/OrgChart); `role` claim = specific display title (PersonDetail subtitle, squad card lists). `personRoleMap` in `useData()`.
 - **Link claims:** `relation: link`, `subject`=entity id, `object`=URL, `detail`=label, `source`=type (jira/slack/confluence/github/website/wporg/personio/…).
 - **Repo naming:** `org/repo` format. `LinksSidebar` auto-generates GitHub link for matching names — no explicit claim needed. See [ADR-004](adr/004-two-csv-data-model.md).

@@ -4,6 +4,7 @@ import { useStar } from '../context/StarContext';
 import { filterClaims } from '../utils/derive';
 import { PersonItem } from './PersonItem';
 import { ProjectItem } from './ProjectItem';
+import { RepoItem } from './RepoItem';
 import { Entity, Claim } from '../types';
 
 interface Props {
@@ -25,6 +26,40 @@ function ProjectsBlock({ projects }: { projects: { project: Entity; claim: Claim
 					<ProjectItem
 						key={project.id} project={project} claim={claim} detail={claim.detail}
 					/>
+				))}
+			</ul>
+		</div>
+	);
+}
+
+function DependenciesBlock({ deps }: { deps: { entity: Entity | null; label: string }[] }) {
+	if (!deps.length) return null;
+	return (
+		<div className='block'>
+			<div className='block__heading'>Dependencies</div>
+			<ul className='entity-list'>
+				{deps.map(({ entity, label }) =>
+					entity?.type === 'repo' ? (
+						<RepoItem key={entity.id} repo={entity} />
+					) : (
+						<li key={label} className='entity-item'>
+							<code className='font-mono'>{label}</code>
+						</li>
+					),
+				)}
+			</ul>
+		</div>
+	);
+}
+
+function UsagesBlock({ usages }: { usages: Entity[] }) {
+	if (!usages.length) return null;
+	return (
+		<div className='block'>
+			<div className='block__heading'>Used by <span className='block__heading-count'>{usages.length}</span></div>
+			<ul className='entity-list'>
+				{usages.map(repo => (
+					<RepoItem key={repo.id} repo={repo} />
 				))}
 			</ul>
 		</div>
@@ -54,9 +89,14 @@ function ContributorsBlock({ contributors }: ContributorsBlockProps) {
 }
 
 export function RepoDetailMain({ repoId, compact }: Props) {
-	const { claims, entityMap: map } = useData();
+	const { claims, entityMap: map, repoDepsMap, repoUsagesMap } = useData();
 	const { starred, isStarred } = useStar();
 	const repo = map.get(repoId);
+	const deps = useMemo(() => repoDepsMap.get(repoId) ?? [], [repoDepsMap, repoId]);
+	const usages = useMemo(
+		() => (repoUsagesMap.get(repoId) ?? []).sort((a, b) => a.name.localeCompare(b.name)),
+		[repoUsagesMap, repoId],
+	);
 
 	const contributorClaims = useMemo(
 		() => repo ? filterClaims(claims, { relation: 'contributes-to', object: repo.id }) : [],
@@ -96,6 +136,8 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 		return (
 			<div className='popup__body'>
 				<div className='popup__col'>
+					<DependenciesBlock deps={deps} />
+					<UsagesBlock usages={usages} />
 					<ProjectsBlock projects={projects} />
 					<ContributorsBlock contributors={contributors} />
 				</div>
@@ -105,8 +147,15 @@ export function RepoDetailMain({ repoId, compact }: Props) {
 
 	return (
 		<div className='detail-main'>
-			<ProjectsBlock projects={projects} />
-			<ContributorsBlock contributors={contributors} />
+			<div className='cols-2'>
+				<div className='stack'>
+					<ProjectsBlock projects={projects} />
+					<DependenciesBlock deps={deps} />
+					<UsagesBlock usages={usages} />
+				</div>
+
+				<ContributorsBlock contributors={contributors} />
+			</div>
 		</div>
 	);
 }

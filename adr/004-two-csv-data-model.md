@@ -24,6 +24,8 @@ Split data into `entities.csv` (id, name, type, meta) and `claims.csv` (subject,
 
 **Amendment (2026-04-30):** Data format changed from two CSV files (`entities.csv` + `claims.csv`) to a single `team.json` file with top-level `entities` and `claims` arrays. The logical data model (entities + claims, same fields) is unchanged. `parseEntities`/`parseClaims`/`exportEntities`/`exportClaims` (PapaParse-based) replaced by `parseTeamJson`/`exportTeamJson` (native JSON). `SAMPLE_ENTITIES_CSV` + `SAMPLE_CLAIMS_CSV` in `sampleData.ts` replaced by `SAMPLE_TEAM_JSON`. Import UI reduced to one full-width textarea accepting a single JSON paste or file upload. See ADR-019.
 
+**Amendment (2026-05-04):** Added `uses` relation type. A `uses` claim records that a repo entity (`subject`) depends on either another repo entity or a plain string (e.g. `"php8.3"`). When `object` matches a known repo entity ID, the dependency renders as a `RepoItem` link; otherwise it renders as a `<code>` string. The reverse relationship ("Used by") is derived automatically from the same claims and shown on the depended-upon repo's detail page. `VALID_RELATIONS` in `csv.ts` updated to accept `uses`.
+
 ## Consequences
 
 - Staleness is per-fact, not per-entity — a stale project assignment doesn't flag the whole person.
