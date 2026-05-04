@@ -14,7 +14,7 @@ interface Props {
 
 export function SquadCard({ squad }: Props) {
 	const navigate = useNavigate();
-	const { claims, teamSize } = useData();
+	const { claims } = useData();
 
 	const memberCount = useMemo(
 		() => filterClaims(claims, { relation: 'member-of', object: squad.id }).length,
@@ -22,9 +22,8 @@ export function SquadCard({ squad }: Props) {
 	);
 
 	const projectCount = useMemo(
-		() => filterClaims(claims, { relation: 'owned-by', object: squad.id })
-			.filter(c => (teamSize.get(c.subject) ?? 0) > 0).length,
-		[claims, squad.id, teamSize],
+		() => filterClaims(claims, { relation: 'owned-by', object: squad.id }).length,
+		[claims, squad.id],
 	);
 
 	const metaItems = useMemo(() => {

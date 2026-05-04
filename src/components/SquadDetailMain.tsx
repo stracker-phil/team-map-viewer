@@ -14,7 +14,7 @@ interface Props {
 
 export function SquadDetailMain({ squadId, compact }: Props) {
 	const { starred, isStarred } = useStar();
-	const { claims, entityMap: map, teamSize } = useData();
+	const { claims, entityMap: map } = useData();
 	const squad = map.get(squadId);
 
 	const memberClaims = useMemo(
@@ -52,12 +52,12 @@ export function SquadDetailMain({ squadId, compact }: Props) {
 			.filter((x): x is {
 				project: Entity;
 				claim: Claim
-			} => !!x.project && x.project.type === 'project' && (teamSize.get(x.project.id) ?? 0) > 0)
+			} => !!x.project && x.project.type === 'project')
 			.sort((a, b) =>
 				Number(isStarred(b.project.id)) - Number(isStarred(a.project.id)) ||
 				a.project.name.localeCompare(b.project.name),
 			),
-		[ownedClaims, map, teamSize, starred],
+		[ownedClaims, map, starred],
 	);
 
 	const ownedRepos = useMemo(() => {
