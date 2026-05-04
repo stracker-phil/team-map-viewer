@@ -8,7 +8,7 @@
 
 - **works-on vs contributes-to:** `works-on` targets `project`; `contributes-to` targets `repo`. PersonDetail shows separate "Projects" and "Other Repos" cards. `works-on` pointing to a repo is silently rerouted to Other Repos. `teamSize` only counts `works-on` where target is a `project`. See [SPEC-009](../../spec/009-person-detail.md).
 - **belongs-to:** Connects repo (subject) to project (object). ProjectDetail shows "Repos" after owner; RepoDetail shows "Projects" above contributors. Both hidden when no `belongs-to` claims exist.
-- **0-member projects hidden:** Projects with no `works-on` members filtered out in ProjectsList, SquadCard stats, and SquadDetail projects column. Use `teamSize` from `useData()`.
+- **Project visibility:** ProjectsList shows projects that are squad-owned (`owned-by` claim) OR have at least one `works-on` member. Squad-owned projects with 0 detected members are shown so they remain discoverable. Unowned + 0-member projects are hidden.
 
 ## Entity tables
 

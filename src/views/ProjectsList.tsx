@@ -12,10 +12,9 @@ export function ProjectsList() {
 
 	const [ownerFilter, setOwnerFilter] = useState<string | null>(null);
 
-	// Only show projects that have at least one team member
 	const activeProjects = useMemo(
-		() => projects.filter(p => (teamSize.get(p.id) ?? 0) > 0),
-		[projects, teamSize],
+		() => projects.filter(p => squadOf.has(p.id) || (teamSize.get(p.id) ?? 0) > 0),
+		[projects, teamSize, squadOf],
 	);
 
 	const allOwners = useMemo(() => {
