@@ -67,4 +67,5 @@ Badges rendered as `.type-badge.type-badge--{type}` chips, currently used in the
 - The `EntityLink` component has no type-badge prop — type identity comes from `.type-badge` chips in the CMD+K overlay.
 - The `⌘L` search shortcut is replaced by `⌘K` (more conventional palette-style trigger).
 - Squad cards no longer expand inline — the squad detail page is the only place to see members and projects.
-- CSS custom properties make palette changes trivial: `--bg`, `--surface`, `--sidebar-bg` are the three main surfaces to swap for dark mode or rebranding.
+- CSS custom properties make palette changes trivial via `config.theme.colors` in `team.json`. See [ADR-020](020-config-block.md) for the full key list, including `link` (link text color, defaults to `--accent`) and `accentFg` (text on accent backgrounds, defaults to `--bg`).
+- Four alpha-tinted variants (`--accent-subtle`, `--accent-subtle-border`, `--accent-underline`, `--surface-hover`) are derived at paint time via CSS `color-mix()` from `--accent` and `--text`. All formerly hardcoded `rgba(31,72,66,X)` teal values now reference these vars, so they update automatically with any accent override.

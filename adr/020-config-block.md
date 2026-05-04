@@ -25,7 +25,8 @@ Add an optional top-level `config` key to `team.json`. It is parsed by `parseTea
     "theme": {
       "colors": {
         "bg": "#…", "surface": "#…", "sidebarBg": "#…",
-        "accent": "#…", "text": "#…", "muted": "#…"
+        "accent": "#…", "text": "#…", "muted": "#…",
+        "link": "#…", "accentFg": "#…"
       }
     },
     "footer": {
@@ -44,9 +45,31 @@ All keys are optional. Partial overrides are safe — only present keys take eff
 |---|---|
 | `brand.name` | Replaces "Team Map" in topbar |
 | `pages.{view}.description` | Muted subtitle rendered below `section-intro__title` |
-| `theme.colors.*` | Mapped to CSS vars and set on `:root` via `document.documentElement.style.setProperty` in a `useEffect` in `DataProvider`; absent keys call `removeProperty` to restore defaults |
+| `theme.colors.*` | Mapped to CSS vars and set on `:root` via `document.documentElement.style.setProperty` in a `useEffect` in `DataProvider`; absent keys call `removeProperty` to restore defaults. See color key table below. |
 | `footer.text` | Rendered as-is at the bottom of every page |
 | `footer.builtAt` | Rendered as "Data as of …" next to `footer.text` |
+
+### theme.colors keys
+
+| JSON key | CSS var | Notes |
+|----------|---------|-------|
+| `bg` | `--bg` | Page background |
+| `surface` | `--surface` | Card / block backgrounds |
+| `sidebarBg` | `--sidebar-bg` | Links sidebar background |
+| `accent` | `--accent` | Decorative accent: nav active, icon highlights, hover borders |
+| `text` | `--text` | Body text |
+| `muted` | `--muted` | Secondary labels and metadata |
+| `link` | `--link` | Link text color on surfaces. Falls back to `--accent` in CSS if unset. Set darker than `accent` when accent is a light/neon color. |
+| `accentFg` | `--accent-fg` | Foreground text on accent-colored backgrounds (e.g. primary button hover). Falls back to `--bg` if unset. |
+
+In addition, four vars are **auto-derived in CSS via `color-mix()`** — they update automatically when `--accent` or `--text` changes and cannot be overridden from JSON:
+
+| CSS var | Derived from | Used for |
+|---------|--------------|----------|
+| `--accent-subtle` | 8% accent | Demo banner bg, import success bg, entity-link hover bg |
+| `--accent-subtle-border` | 16% accent | Demo banner border, import success border |
+| `--accent-underline` | 30% accent | Link underline decoration, fresh stale dot |
+| `--surface-hover` | 5% text | Search result row hover |
 
 ### Persistence
 

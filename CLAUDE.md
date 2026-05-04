@@ -27,6 +27,7 @@ src/
   components/             shared UI — see src/components/CLAUDE.md
   views/                  route views — see src/views/CLAUDE.md
 data/team.json            template data, no real data
+data/CLAUDE.md            team.json schema reference (config, entities, claims)
 adr/                      architectural decisions (ADR-001 – ADR-020)
 spec/                     behavioral specs (SPEC-001 – SPEC-015)
 ```
@@ -46,7 +47,7 @@ spec/                     behavioral specs (SPEC-001 – SPEC-015)
 
 `--bg: #fafafa`, `--surface: #E1E3E2` (cards), `--sidebar-bg: #FFDBCC` (links sidebar), teal accent `#1F4842`. Fraunces/Geist/JetBrains Mono fonts. Cards use background color for depth — no decorative borders. Fixed 48px topbar; CMD+K (`⌘K`/`Ctrl+K`) opens search overlay. See [ADR-012](adr/012-editorial-design-system.md).
 
-CSS vars (`--bg`, `--surface`, `--sidebar-bg`, `--accent`, `--text`, `--muted`) can be overridden at runtime via `config.theme.colors` in `team.json` — set on `:root` by `DataProvider`. Absent keys fall back to stylesheet defaults via `removeProperty`.
+CSS vars (`--bg`, `--surface`, `--sidebar-bg`, `--accent`, `--text`, `--muted`, `--link`, `--accent-fg`) can be overridden at runtime via `config.theme.colors` in `team.json` — set on `:root` by `DataProvider`. Absent keys fall back to stylesheet defaults via `removeProperty`. `--link` defaults to `--accent`; set it darker when accent is a light/neon color. `--accent-fg` defaults to `--bg`; set it when accent is too light for white text. Four additional alpha-tinted vars (`--accent-subtle`, `--accent-subtle-border`, `--accent-underline`, `--surface-hover`) are auto-derived via CSS `color-mix()` — no JSON key needed. See [data/CLAUDE.md](data/CLAUDE.md) for the full schema and [ADR-020](adr/020-config-block.md) for implementation details.
 
 Type badges: `.type-badge.type-badge--{type}`. CSS vars `--type-{person,squad,project,repo}-{bg,text}` on `:root`. Used in CMD+K results.
 
