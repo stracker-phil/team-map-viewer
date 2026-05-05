@@ -65,8 +65,9 @@ body {
 /* ── Top bar theme ── */
 
 .topbar {
-	background: var(--bg);
+	background: color-mix(in srgb, var(--bg) 50%, #0000 100%);
 	border-bottom: 1px solid var(--border-solid);
+	backdrop-filter: blur(15px);
 }
 
 .topbar__brand {
